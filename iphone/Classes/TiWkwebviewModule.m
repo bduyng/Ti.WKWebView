@@ -1,8 +1,8 @@
 /**
- * ti.wkwebview
- *
- * Created by Hans Knoechel
- * Copyright (c) 2016 Your Company. All rights reserved.
+ * Appcelerator Titanium Mobile
+ * Copyright (c) 2009-2016 by Appcelerator, Inc. All Rights Reserved.
+ * Licensed under the terms of the Apache Public License
+ * Please see the LICENSE included with this distribution for details.
  */
 
 #import "TiWkwebviewModule.h"
@@ -14,14 +14,12 @@
 
 #pragma mark Internal
 
-// this is generated for your module, please do not change it
--(id)moduleGUID
+- (id)moduleGUID
 {
 	return @"b63a2be9-04e3-4bb2-82ec-7c00978de132";
 }
 
-// this is generated for your module, please do not change it
--(NSString*)moduleId
+- (NSString *)moduleId
 {
 	return @"ti.wkwebview";
 }
