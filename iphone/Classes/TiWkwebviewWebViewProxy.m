@@ -66,6 +66,30 @@
     return NUMBOOL([[[self webView] webView] hasOnlySecureContent]);
 }
 
+- (id)backForwardList
+{
+    WKBackForwardList *list = [[[self webView] webView] backForwardList];
+    
+    NSMutableArray *backList = [NSMutableArray arrayWithCapacity:list.backList.count];
+    NSMutableArray *forwardList = [NSMutableArray arrayWithCapacity:list.forwardList.count];
+    
+    for (WKBackForwardListItem *item in list.backList) {
+        [backList addObject:[TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:item]];
+    }
+    
+    for (WKBackForwardListItem *item in list.forwardList) {
+        [forwardList addObject:[TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:item]];
+    }
+    
+    return @{
+        @"currentItem": [TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:[list currentItem]],
+        @"backItem": [TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:[list backItem]],
+        @"forwardItem": [TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:[list forwardItem]],
+        @"backList": backList,
+        @"forwardList": forwardList
+    };
+}
+
 #pragma mark Methods
 
 - (void)stopLoading:(id)unused
@@ -98,7 +122,6 @@
     return NUMBOOL([[[self webView] webView] canGoForward]);
 }
 
-// Callback based in this API to avoid dead-locks on the main-thread
 - (void)evalJS:(id)args
 {
     NSString *code = nil;
@@ -107,7 +130,8 @@
     ENSURE_ARG_AT_INDEX(code, args, 0, NSString);
     ENSURE_ARG_AT_INDEX(callback, args, 1, KrollCallback);
 
-    [[self webView] stringByEvaluatingJavaScriptFromString:code withCompletionHandler:^(NSString *result, NSError *error) {
+    [[self webView] stringByEvaluatingJavaScriptFromString:code
+                                     withCompletionHandler:^(NSString *result, NSError *error) {
         NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
             @"result": result ?: [NSNull null],
             @"success": NUMBOOL(error == nil)
@@ -119,6 +143,13 @@
         
         [callback call:[[NSArray alloc] initWithObjects:&event count:1] thisObject:self];
     }];
+}
+
+#pragma mark Utilities
+
++ (NSDictionary *)dictionaryFromBackForwardItem:(WKBackForwardListItem *)item
+{
+    return @{@"url": item.URL.absoluteString, @"initialUrl": item.initialURL.absoluteString, @"title": item.title};
 }
 
 @end

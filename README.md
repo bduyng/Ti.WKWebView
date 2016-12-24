@@ -27,8 +27,55 @@ Edit the modules section of your `tiapp.xml` file to include this module:
 ```
 
 Features
---------------------------------
-TBA
+---------------
+**Properties**:
+- disableBounce
+- suppressesIncrementalRendering
+- scalePageToFit
+- allowsInlineMediaPlayback
+- allowsAirPlayMediaPayback
+- allowsPictureInPictureMediaPlaback
+- allowsBackForwardNavigationGestures
+- allowsLinkPreview
+- scrollsToTop
+- disableContextMenu
+- userAgent
+- url
+- data
+- html
+- title
+- progress
+- loading
+- secure
+- backForwardList
+
+**Methods**:
+- stopLoading
+- reload
+- goBack
+- goForward
+- canGoBack
+- canGoForward
+- evalJS
+
+**Events**:
+- message
+- progress
+- beforeload
+- load
+- redirect
+
+WebView <-> App Communication
+---------------
+You can send data from the Web View to your native app by posting messages like this:
+```javascript
+window.webkit.messageHandlers.Ti.postMessage({foo: 'bar'},'*');
+```
+This will trigger the `message` event with the following event keys:
+- url
+- message
+- name
+- isMainFrame
 
 Author
 ---------------

@@ -8,7 +8,7 @@
 #import "TiViewProxy.h"
 #import "TiEvaluator.h"
 
-@interface TiWkwebviewWebViewProxy : TiViewProxy{
+@interface TiWkwebviewWebViewProxy : TiViewProxy {
 
 }
 

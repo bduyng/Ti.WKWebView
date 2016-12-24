@@ -4,6 +4,7 @@
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
+
 #import "TiWkwebviewWebView.h"
 #import "TiWkwebviewWebViewProxy.h"
 #import "TiFilesystemFileProxy.h"
@@ -20,12 +21,11 @@
         [[TiApp app] attachXHRBridgeIfRequired];
                 
         _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:[self configuration]];
-        [_webView.configuration.userContentController addScriptMessageHandler:self name:@"Ti"];
         
         [_webView setUIDelegate:self];
         [_webView setNavigationDelegate:self];
         [_webView setContentMode:[self contentModeForWebView]];
-        [_webView setAutoresizingMask:UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth];
+        [_webView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
         
         // KVO for "progress" event
         [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
@@ -204,18 +204,25 @@
     id suppressesIncrementalRendering = [[self proxy] valueForKey:@"suppressesIncrementalRendering"];
     id scalePageToFit = [[self proxy] valueForKey:@"scalePageToFit"];
     id allowsInlineMediaPlayback = [[self proxy] valueForKey:@"allowsInlineMediaPlayback"];
-    id allowsAirPlayForMediaPlayback = [[self proxy] valueForKey:@"allowsAirPlayForMediaPlayback"];
+    id allowsAirPlayMediaPlayback = [[self proxy] valueForKey:@"allowsAirPlayMediaPlayback"];
     id allowsPictureInPictureMediaPlayback = [[self proxy] valueForKey:@"allowsPictureInPictureMediaPlayback"];
+    id disableContextMenu = [[self proxy] valueForKey:@"disableContextMenu"];
     
     if ([TiUtils boolValue:scalePageToFit def:YES]) {
         [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
     }
     
+    if ([TiUtils boolValue:disableContextMenu def:NO]) {
+        [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
+    }
+    
+    [controller addScriptMessageHandler:self name:@"Ti"];
+    
     [config setSuppressesIncrementalRendering:[TiUtils boolValue:suppressesIncrementalRendering def:NO]];
 
     [config setAllowsInlineMediaPlayback:[TiUtils boolValue:allowsInlineMediaPlayback def:NO]];
     
-    [config setAllowsAirPlayForMediaPlayback:[TiUtils boolValue:allowsAirPlayForMediaPlayback def:NO]];
+    [config setAllowsAirPlayForMediaPlayback:[TiUtils boolValue:allowsAirPlayMediaPlayback def:NO]];
 
     [config setAllowsPictureInPictureMediaPlayback:[TiUtils boolValue:allowsPictureInPictureMediaPlayback def:YES]];
     
@@ -234,7 +241,7 @@
     return [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
 }
 
-+ (WKUserScript *)userScriptDisableSelection
++ (WKUserScript *)userScriptDisableContextMenu
 {
     NSString *source = @"var style = document.createElement('style'); \
                          style.type = 'text/css'; \
@@ -254,7 +261,7 @@
                                forMainFrameOnly:YES];
 }
 
--(NSString *)pathFromComponents:(NSArray *)args
+- (NSString *)pathFromComponents:(NSArray *)args
 {
     NSString * newPath;
     id first = [args objectAtIndex:0];
@@ -276,15 +283,16 @@
     return [newPath stringByStandardizingPath];
 }
 
--(id)resolveFile:(id)arg
+- (id)resolveFile:(id)arg
 {
     if ([arg isKindOfClass:[TiFilesystemFileProxy class]]) {
         return [(TiFilesystemFileProxy *)arg path];
     }
+    
     return [TiUtils stringValue:arg];
 }
 
--(NSString *)resourcesDirectory
+- (NSString *)resourcesDirectory
 {
     return [NSString stringWithFormat:@"%@/",[[NSURL fileURLWithPath:[TiHost resourcePath] isDirectory:YES] path]];
 }
@@ -325,7 +333,6 @@
     return nil;
 }
 
-
 // Add support for evaluating JS with the WKWebView and return back an evaluated value.
 - (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)script withCompletionHandler:(void (^)(NSString *result, NSError *error))completionHandler
 {
@@ -333,7 +340,7 @@
         if (error == nil && result != nil) {
             completionHandler([NSString stringWithFormat:@"%@", result], nil);
         } else {
-            NSLog(@"[DEBUG] Evaluating JavaScript failed : %@", [error localizedDescription]);
+            NSLog(@"[DEBUG] Evaluating JavaScript failed: %@", [error localizedDescription]);
             completionHandler(nil, error);
         }
     }];
@@ -378,7 +385,6 @@
     
     [super frameSizeChanged:frame bounds:bounds];
 }
-
 
 - (CGFloat)contentWidthForWidth:(CGFloat)suggestedWidth
 {
