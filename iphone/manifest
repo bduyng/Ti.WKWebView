@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0.0
+apiversion: 2
+architectures: armv7 arm64 i386 x86_64
+description: ti.wkwebview
+author: Hans Knoechel
+license: Specify your license
+copyright: Copyright (c) 2016 by Your Company
+
+# these should not be edited
+name: ti.wkwebview
+moduleid: ti.wkwebview
+guid: b63a2be9-04e3-4bb2-82ec-7c00978de132
+platform: iphone
+minsdk: 6.1.0
