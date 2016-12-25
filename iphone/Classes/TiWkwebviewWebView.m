@@ -134,134 +134,20 @@
     [[self webView] setCustomUserAgent:[TiUtils stringValue:value]];
 }
 
-#pragma mark Delegates
 
-- (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler
+- (id)setPreferences_:(id)args
 {
-    id basicAuthentication = [[self proxy] valueForKey:@"basicAuhentication"];
-
-    NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
-    NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
-    NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
+    WKPreferences *prefs = [WKPreferences new];
     
-    // TODO: Allow property to ignore TLS error
+    id minimumFontSize = [args valueForKey:@"minimumFontSize"];
+    id javaScriptEnabled = [args valueForKey:@"javaScriptEnabled"];
+    id javaScriptCanOpenWindowsAutomatically = [args valueForKey:@"javaScriptCanOpenWindowsAutomatically"];
     
-    if (!basicAuthentication || !username || !password) {
-        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
-    } else {
-        completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
-                                                                                               password:password
-                                                                                            persistence:persistence]);
-    }
-}
+    [prefs setMinimumFontSize:[TiUtils floatValue:minimumFontSize def:0]];
+    [prefs setJavaScriptEnabled:[TiUtils boolValue:javaScriptEnabled def:YES]];
+    [prefs setJavaScriptCanOpenWindowsAutomatically:[TiUtils boolValue:javaScriptCanOpenWindowsAutomatically def:NO]];
     
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
-{
-    if ([[self proxy] _hasListeners:@"load"]) {
-        [[self proxy] fireEvent:@"load" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
-    }
-}
-
-- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
-{
-    if ([[self proxy] _hasListeners:@"error"]) {
-        [[self proxy] fireEvent:@"error" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title, @"error": [error localizedDescription]}];
-    }
-}
-
-- (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation
-{
-    if ([[self proxy] _hasListeners:@"redirect"]) {
-        [[self proxy] fireEvent:@"redirect" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
-    }
-}
-
-- (BOOL)webView:(WKWebView *)webView shouldPreviewElement:(WKPreviewElementInfo *)elementInfo
-{
-    return [TiUtils boolValue:[[self proxy] valueForKey:@"allowsLinkPreview"] def:NO];
-}
-
-- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler
-{
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
-                                                                             message:message
-                                                                      preferredStyle:UIAlertControllerStyleAlert];
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
-                                                        style:UIAlertActionStyleCancel
-                                                      handler:^(UIAlertAction *action) {
-                                                          completionHandler();
-                                                      }]];
-    
-    [[TiApp app] showModalController:alertController animated:YES];
-}
-
-- (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler
-{
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
-                                                                             message:message
-                                                                      preferredStyle:UIAlertControllerStyleAlert];
-    
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
-                                                        style:UIAlertActionStyleDefault
-                                                      handler:^(UIAlertAction *action) {
-                                                          completionHandler(YES);
-                                                      }]];
-    
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
-                                                        style:UIAlertActionStyleCancel
-                                                      handler:^(UIAlertAction *action) {
-                                                          completionHandler(NO);
-                                                      }]];
-    
-    [[TiApp app] showModalController:alertController animated:YES];
-}
-
-- (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler
-{
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
-                                                                             message:prompt
-                                                                      preferredStyle:UIAlertControllerStyleAlert];
-    
-    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.text = defaultText;
-    }];
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
-                                                        style:UIAlertActionStyleDefault
-                                                      handler:^(UIAlertAction *action) {
-                                                          completionHandler(alertController.textFields.firstObject.text ?: defaultText);
-                                                      }]];
-
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
-                                                        style:UIAlertActionStyleCancel
-                                                      handler:^(UIAlertAction *action) {
-                                                          completionHandler(nil);
-                                                      }]];
-
-    [[TiApp app] showModalController:alertController animated:YES];
-}
-
-static NSString * UIKitLocalizedString(NSString *string)
-{
-    NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
-    return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
-}
-
-- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
-{
-    if (![message.name isEqualToString:@"Ti"]) {
-        // Skip messages that are not posted from our Ti namespace
-        // This is necessary to not post events when our App -> WebView hack posts messages
-        return;
-    }
-    
-    if ([[self proxy] _hasListeners:@"message"]) {
-        [[self proxy] fireEvent:@"message" withObject:@{
-            @"url": message.frameInfo.request.URL.absoluteString ?: [[NSBundle mainBundle] bundlePath],
-            @"message": message.body,
-            @"name": message.name,
-            @"isMainFrame": NUMBOOL(message.frameInfo.isMainFrame)
-        }];
-    }
+    [[[self webView] configuration] setPreferences:prefs];
 }
 
 #pragma mark Utilities
@@ -277,6 +163,7 @@ static NSString * UIKitLocalizedString(NSString *string)
     id allowsAirPlayMediaPlayback = [[self proxy] valueForKey:@"allowsAirPlayMediaPlayback"];
     id allowsPictureInPictureMediaPlayback = [[self proxy] valueForKey:@"allowsPictureInPictureMediaPlayback"];
     id disableContextMenu = [[self proxy] valueForKey:@"disableContextMenu"];
+    id mediaTypesRequiringUserActionForPlayback = [[self proxy] valueForKey:@"mediaTypesRequiringUserActionForPlayback"];
     
     if ([TiUtils boolValue:scalePageToFit def:YES]) {
         [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
@@ -290,6 +177,8 @@ static NSString * UIKitLocalizedString(NSString *string)
     [controller addScriptMessageHandler:self name:@"TiCallback"];
     
     [config setSuppressesIncrementalRendering:[TiUtils boolValue:suppressesIncrementalRendering def:NO]];
+
+    [config setMediaTypesRequiringUserActionForPlayback:[TiUtils intValue:mediaTypesRequiringUserActionForPlayback def:WKAudiovisualMediaTypeNone]];
 
     [config setAllowsInlineMediaPlayback:[TiUtils boolValue:allowsInlineMediaPlayback def:NO]];
     
@@ -402,6 +291,137 @@ static NSString * UIKitLocalizedString(NSString *string)
     }
     
     return nil;
+}
+
+
+#pragma mark Delegates
+
+- (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler
+{
+    id basicAuthentication = [[self proxy] valueForKey:@"basicAuhentication"];
+    
+    NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
+    NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
+    NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
+    
+    // TODO: Allow property to ignore TLS error
+    
+    if (!basicAuthentication || !username || !password) {
+        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+    } else {
+        completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
+                                                                                               password:password
+                                                                                            persistence:persistence]);
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
+{
+    if ([[self proxy] _hasListeners:@"load"]) {
+        [[self proxy] fireEvent:@"load" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
+{
+    if ([[self proxy] _hasListeners:@"error"]) {
+        [[self proxy] fireEvent:@"error" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title, @"error": [error localizedDescription]}];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation
+{
+    if ([[self proxy] _hasListeners:@"redirect"]) {
+        [[self proxy] fireEvent:@"redirect" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
+    }
+}
+
+- (BOOL)webView:(WKWebView *)webView shouldPreviewElement:(WKPreviewElementInfo *)elementInfo
+{
+    return [TiUtils boolValue:[[self proxy] valueForKey:@"allowsLinkPreview"] def:NO];
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
+                                                                             message:message
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler();
+                                                      }]];
+    
+    [[TiApp app] showModalController:alertController animated:YES];
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
+                                                                             message:message
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(YES);
+                                                      }]];
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(NO);
+                                                      }]];
+    
+    [[TiApp app] showModalController:alertController animated:YES];
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
+                                                                             message:prompt
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    
+    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.text = defaultText;
+    }];
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(alertController.textFields.firstObject.text ?: defaultText);
+                                                      }]];
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(nil);
+                                                      }]];
+    
+    [[TiApp app] showModalController:alertController animated:YES];
+}
+
+static NSString * UIKitLocalizedString(NSString *string)
+{
+    NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
+    return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
+}
+
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
+{
+    if (![message.name isEqualToString:@"Ti"]) {
+        // Skip messages that are not posted from our Ti namespace
+        // This is necessary to not post events when our App -> WebView hack posts messages
+        return;
+    }
+    
+    if ([[self proxy] _hasListeners:@"message"]) {
+        [[self proxy] fireEvent:@"message" withObject:@{
+                                                        @"url": message.frameInfo.request.URL.absoluteString ?: [[NSBundle mainBundle] bundlePath],
+                                                        @"message": message.body,
+                                                        @"name": message.name,
+                                                        @"isMainFrame": NUMBOOL(message.frameInfo.isMainFrame)
+                                                        }];
+    }
 }
 
 #pragma mark Layout helper
