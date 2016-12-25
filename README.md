@@ -77,9 +77,14 @@ This will trigger the `message` event with the following event keys:
 - name
 - isMainFrame
 
+For sending messages from the app to the Web View, use `evalJS` to call your JS methods like this:
+```javascript
+webView.evalJS('myJSMethod();');
+```
+
 Author
 ---------------
-- Hans Knoechel ([@hansemannnn](https://twitter.com/hansemannnn) / [Web](http://hans-knoechel.de))
+Hans Knoechel ([@hansemannnn](https://twitter.com/hansemannnn) / [Web](http://hans-knoechel.de))
 
 License
 ---------------
