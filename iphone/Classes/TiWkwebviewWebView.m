@@ -516,7 +516,7 @@ static NSString * UIKitLocalizedString(NSString *string)
         if ([[self proxy] _hasListeners:@"progress"]) {
             [[self proxy] fireEvent:@"progress" withObject:@{
                 @"progress": NUMDOUBLE([[self webView] estimatedProgress]),
-                @"url": [[[self webView] URL] absoluteString]
+                @"url": [[[self webView] URL] absoluteString] ?: @""
             }];
         }
     } else {
