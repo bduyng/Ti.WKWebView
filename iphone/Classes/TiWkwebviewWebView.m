@@ -328,6 +328,13 @@
     }
 }
 
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error
+{
+    if ([[self proxy] _hasListeners:@"error"]) {
+        [[self proxy] fireEvent:@"error" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title, @"error": [error localizedDescription]}];
+    }
+}
+
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation
 {
     if ([[self proxy] _hasListeners:@"redirect"]) {
