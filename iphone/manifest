@@ -15,4 +15,4 @@ name: ti.wkwebview
 moduleid: ti.wkwebview
 guid: b63a2be9-04e3-4bb2-82ec-7c00978de132
 platform: iphone
-minsdk: 6.1.0
+minsdk: 5.0.0
