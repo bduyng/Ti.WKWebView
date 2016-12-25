@@ -122,6 +122,28 @@
     return NUMBOOL([[[self webView] webView] canGoForward]);
 }
 
+- (void)postMessage:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSDictionary);
+    
+    NSError *error;
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:args
+                                                       options:0
+                                                         error:&error];
+    
+    if (! jsonData) {
+        NSLog(@"[ERROR] Could not post message. Invalid JS object: %@", error.localizedDescription);
+        return;
+    }
+    
+    NSString *message = [NSString stringWithFormat:@"window.webkit.messageHandlers.TiCallback.postMessage(%@, '*');", [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+    
+    [[[self webView] webView] evaluateJavaScript:message completionHandler:^(id result, NSError *error) {
+
+    }];
+}
+
 - (void)evalJS:(id)args
 {
     NSString *code = nil;
@@ -130,8 +152,7 @@
     ENSURE_ARG_AT_INDEX(code, args, 0, NSString);
     ENSURE_ARG_AT_INDEX(callback, args, 1, KrollCallback);
 
-    [[self webView] stringByEvaluatingJavaScriptFromString:code
-                                     withCompletionHandler:^(NSString *result, NSError *error) {
+    [[[self webView] webView] evaluateJavaScript:code completionHandler:^(id result, NSError *error) {
         NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
             @"result": result ?: [NSNull null],
             @"success": NUMBOOL(error == nil)
@@ -144,6 +165,7 @@
         [callback call:[[NSArray alloc] initWithObjects:&event count:1] thisObject:self];
     }];
 }
+
 
 #pragma mark Utilities
 

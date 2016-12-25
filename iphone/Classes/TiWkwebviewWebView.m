@@ -181,10 +181,80 @@
     return [TiUtils boolValue:[[self proxy] valueForKey:@"allowsLinkPreview"] def:NO];
 }
 
+- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
+                                                                             message:message
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler();
+                                                      }]];
+    
+    [[TiApp app] showModalController:alertController animated:YES];
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
+                                                                             message:message
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(YES);
+                                                      }]];
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(NO);
+                                                      }]];
+    
+    [[TiApp app] showModalController:alertController animated:YES];
+}
+
+- (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
+                                                                             message:prompt
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    
+    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.text = defaultText;
+    }];
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(alertController.textFields.firstObject.text ?: defaultText);
+                                                      }]];
+
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
+                                                        style:UIAlertActionStyleCancel
+                                                      handler:^(UIAlertAction *action) {
+                                                          completionHandler(nil);
+                                                      }]];
+
+    [[TiApp app] showModalController:alertController animated:YES];
+}
+
+static NSString * UIKitLocalizedString(NSString *string)
+{
+    NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
+    return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
+}
+
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
+    if (![message.name isEqualToString:@"Ti"]) {
+        // Skip messages that are not posted from our Ti namespace
+        // This is necessary to not post events when our App -> WebView hack posts messages
+        return;
+    }
+    
     if ([[self proxy] _hasListeners:@"message"]) {
-        // TODO: May need to bridge the body type for data
         [[self proxy] fireEvent:@"message" withObject:@{
             @"url": message.frameInfo.request.URL.absoluteString ?: [[NSBundle mainBundle] bundlePath],
             @"message": message.body,
@@ -217,6 +287,7 @@
     }
     
     [controller addScriptMessageHandler:self name:@"Ti"];
+    [controller addScriptMessageHandler:self name:@"TiCallback"];
     
     [config setSuppressesIncrementalRendering:[TiUtils boolValue:suppressesIncrementalRendering def:NO]];
 
@@ -331,19 +402,6 @@
     }
     
     return nil;
-}
-
-// Add support for evaluating JS with the WKWebView and return back an evaluated value.
-- (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)script withCompletionHandler:(void (^)(NSString *result, NSError *error))completionHandler
-{
-    [[self webView] evaluateJavaScript:script completionHandler:^(id result, NSError *error) {
-        if (error == nil && result != nil) {
-            completionHandler([NSString stringWithFormat:@"%@", result], nil);
-        } else {
-            NSLog(@"[DEBUG] Evaluating JavaScript failed: %@", [error localizedDescription]);
-            completionHandler(nil, error);
-        }
-    }];
 }
 
 #pragma mark Layout helper
