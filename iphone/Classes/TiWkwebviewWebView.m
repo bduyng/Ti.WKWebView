@@ -298,14 +298,13 @@
 
 - (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler
 {
-    id basicAuthentication = [[self proxy] valueForKey:@"basicAuhentication"];
+    id basicAuthentication = [[self proxy] valueForKey:@"basicAuthentication"];
     
     NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
     NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
     NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
     
     // TODO: Allow property to ignore TLS error
-    
     if (!basicAuthentication || !username || !password) {
         completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
     } else {
