@@ -48,6 +48,9 @@ Features
 - loading
 - secure
 - backForwardList
+- mediaTypesRequiringUserActionForPlayback
+- preferences {minimumFontSize, javaScriptEnabled, javaScriptCanOpenWindowsAutomatically}
+- basicAuhentication {username, password, persistence}
 
 **Methods**:
 - stopLoading
@@ -64,6 +67,16 @@ Features
 - beforeload
 - load
 - redirect
+
+**Constants**:
+- CREDENTIAL_PERSISTENCE_NONE
+- CREDENTIAL_PERSISTENCE_FOR_SESSION
+- CREDENTIAL_PERSISTENCE_PERMANENT
+- CREDENTIAL_PERSISTENCE_SYNCHRONIZABLE
+- AUDIOVISUAL_MEDIA_TYPE_NONE
+- AUDIOVISUAL_MEDIA_TYPE_AUDIO
+- AUDIOVISUAL_MEDIA_TYPE_VIDEO
+- AUDIOVISUAL_MEDIA_TYPE_ALL
 
 WebView <-> App Communication
 ---------------
