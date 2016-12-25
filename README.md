@@ -48,6 +48,7 @@ Features
 - loading
 - secure
 - backForwardList
+- ignoreSslError
 - mediaTypesRequiringUserActionForPlayback
 - preferences {minimumFontSize, javaScriptEnabled, javaScriptCanOpenWindowsAutomatically}
 - basicAuhentication {username, password, persistence}

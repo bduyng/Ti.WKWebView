@@ -304,13 +304,25 @@
     NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
     NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
     
-    // TODO: Allow property to ignore TLS error
-    if (!basicAuthentication || !username || !password) {
-        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
-    } else {
+    // Allow invalid certificates if specified
+    if ([TiUtils boolValue:[[self proxy] valueForKey:@"ignoreSslError"] def:NO]) {
+        SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
+        CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
+        SecTrustSetExceptions (serverTrust, exceptions);
+        CFRelease (exceptions);
+        completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+        
+        return;
+    }
+    
+    // Basic authentication
+    if (!basicAuthentication && username && password) {
         completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
                                                                                                password:password
                                                                                             persistence:persistence]);
+     // Default handling
+    } else {
+        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
     }
 }
 
