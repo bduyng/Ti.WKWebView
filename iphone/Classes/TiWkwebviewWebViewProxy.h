@@ -9,7 +9,7 @@
 #import "TiEvaluator.h"
 
 @interface TiWkwebviewWebViewProxy : TiViewProxy {
-
+    NSMutableArray<NSString *> *genericProperties;
 }
 
 @end

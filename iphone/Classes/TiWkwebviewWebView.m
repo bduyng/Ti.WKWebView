@@ -53,7 +53,9 @@
     
     // Handle remote URL's
     if ([value hasPrefix:@"http"] || [value hasPrefix:@"https"]) {
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[TiUtils stringValue:value]]];
+        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[TiUtils stringValue:value]]
+                                                 cachePolicy:[TiUtils intValue:[[self proxy] valueForKey:@"cachePolicy"] def:NSURLRequestUseProtocolCachePolicy]
+                                             timeoutInterval:[TiUtils doubleValue:[[self proxy] valueForKey:@"timeout"]  def:60]];
         [[self webView] loadRequest:request];
         
     // Handle local URL's (WiP)
@@ -435,7 +437,7 @@ static NSString * UIKitLocalizedString(NSString *string)
     if ([[self proxy] _hasListeners:@"message"]) {
         [[self proxy] fireEvent:@"message" withObject:@{
                                                         @"url": message.frameInfo.request.URL.absoluteString ?: [[NSBundle mainBundle] bundlePath],
-                                                        @"message": message.body,
+                                                        @"body": message.body,
                                                         @"name": message.name,
                                                         @"isMainFrame": NUMBOOL(message.frameInfo.isMainFrame)
                                                         }];
@@ -534,7 +536,7 @@ static NSString * UIKitLocalizedString(NSString *string)
     if ([keyPath isEqualToString:@"estimatedProgress"] && object == [self webView]) {
         if ([[self proxy] _hasListeners:@"progress"]) {
             [[self proxy] fireEvent:@"progress" withObject:@{
-                @"progress": NUMDOUBLE([[self webView] estimatedProgress]),
+                @"value": NUMDOUBLE([[self webView] estimatedProgress]),
                 @"url": [[[self webView] URL] absoluteString] ?: @""
             }];
         }
