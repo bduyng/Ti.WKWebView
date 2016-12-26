@@ -56,11 +56,6 @@
     return NUMDOUBLE([[[self webView] webView] estimatedProgress]);
 }
 
-- (id)loading
-{
-    return NUMBOOL([[[self webView] webView] isLoading]);
-}
-
 - (id)secure
 {
     return NUMBOOL([[[self webView] webView] hasOnlySecureContent]);
@@ -91,6 +86,11 @@
 }
 
 #pragma mark Methods
+
+- (id)isLoading:(id)unused
+{
+    return NUMBOOL([[[self webView] webView] isLoading]);
+}
 
 - (void)stopLoading:(id)unused
 {
@@ -132,7 +132,7 @@
                                                        options:0
                                                          error:&error];
     
-    if (! jsonData) {
+    if (!jsonData) {
         NSLog(@"[ERROR] Could not post message. Invalid JS object: %@", error.localizedDescription);
         return;
     }
@@ -142,6 +142,32 @@
     [[[self webView] webView] evaluateJavaScript:message completionHandler:^(id result, NSError *error) {
 
     }];
+}
+
+- (void)startListeningToProperties:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSArray);
+    
+    for (id property in args) {
+        ENSURE_TYPE(property, NSString);
+        
+        [[[self webView] webView] addObserver:self forKeyPath:property options:NSKeyValueObservingOptionNew context:NULL];
+    }
+    
+    genericProperties = args;
+}
+
+- (void)stopListeningToProperties:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSArray);
+    
+    for (id property in args) {
+        ENSURE_TYPE(property, NSString);
+        
+        [[[self webView] webView] removeObserver:self forKeyPath:property];
+    }
+    
+    genericProperties = nil;
 }
 
 - (void)evalJS:(id)args
@@ -166,12 +192,24 @@
     }];
 }
 
-
 #pragma mark Utilities
 
 + (NSDictionary *)dictionaryFromBackForwardItem:(WKBackForwardListItem *)item
 {
     return @{@"url": item.URL.absoluteString, @"initialUrl": item.initialURL.absoluteString, @"title": item.title};
+}
+
+#pragma mark Generic KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    for (NSString *property in genericProperties) {
+        if ([keyPath isEqualToString:property] && object == [self webView]) {
+            [self fireEvent:property withObject:[[self webView] valueForKey:property]];
+            return;
+        }
+    }
+    
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
 @end
