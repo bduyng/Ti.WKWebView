@@ -29,55 +29,75 @@ Edit the modules section of your `tiapp.xml` file to include this module:
 Features
 ---------------
 **Properties**:
-- disableBounce
-- suppressesIncrementalRendering
-- scalePageToFit
-- allowsInlineMediaPlayback
-- allowsAirPlayMediaPayback
-- allowsPictureInPictureMediaPlaback
-- allowsBackForwardNavigationGestures
-- allowsLinkPreview
-- scrollsToTop
-- disableContextMenu
-- userAgent
-- url
-- data
-- html
-- title
-- progress
-- loading
-- secure
-- backForwardList
-- ignoreSslError
-- mediaTypesRequiringUserActionForPlayback
-- preferences {minimumFontSize, javaScriptEnabled, javaScriptCanOpenWindowsAutomatically}
-- basicAuhentication {username, password, persistence}
+
+| Name | Type |
+|------|------|
+| disableBounce | Boolean |
+| suppressesIncrementalRendering | Boolean |
+| scalePageToFit | Boolean |
+| allowsInlineMediaPlayback | Boolean |
+| allowsAirPlayMediaPayback | Boolean |
+| allowsPictureInPictureMediaPlaback | Boolean |
+| allowsBackForwardNavigationGestures | Boolean |
+| allowsLinkPreview | Boolean |
+| scrollsToTop | Boolean |
+| disableContextMenu | Boolean |
+| userAgent | String|
+| url | String |
+| data | Ti.Blob, Ti.File |
+| html | Boolean |
+| title | Boolean |
+| progress | Double |
+| backForwardList | Object |
+| ignoreSslError | Boolean |
+| mediaTypesRequiringUserActionForPlayback | AUDIOVISUAL_MEDIA_TYPE_* |
+| preferences | Object (minimumFontSize, javaScriptEnabled, javaScriptCanOpenWindowsAutomatically) |
+| basicAuhentication | Object (username, password, persistence) |
+| cachePolicy | CACHE_POLICY_* |
+| timeout | Double |
 
 **Methods**:
-- stopLoading
-- reload
-- goBack
-- goForward
-- canGoBack
-- canGoForward
-- evalJS
+
+| Name | Parameter | Return |
+|------|-----------|--------|
+| stopLoading | - | Void |
+| reload | - | Void |
+| goBack | - | Void |
+| goForward | - | Void |
+| canGoBack | - | Boolean |
+| canGoForward | - | Boolean |
+| isLoading | - | Boolean |
+| evalJS | Code (String), Callback (Function) | Void|
+| startListeningToProperties | Properties (Array<String>) | Void |
+| stopListeningToProperties | Properties (Array<String>) | Void |
 
 **Events**:
-- message
-- progress
-- beforeload
-- load
-- redirect
+
+| Name | Properties |
+|------|------------|
+| message | name, body, url, isMainFrame |
+| progress | value, url |
+| beforeload | url, title |
+| load | url, title |
+| redirect | url, title |
+| error | url, title, error |
 
 **Constants**:
-- CREDENTIAL_PERSISTENCE_NONE
-- CREDENTIAL_PERSISTENCE_FOR_SESSION
-- CREDENTIAL_PERSISTENCE_PERMANENT
-- CREDENTIAL_PERSISTENCE_SYNCHRONIZABLE
-- AUDIOVISUAL_MEDIA_TYPE_NONE
-- AUDIOVISUAL_MEDIA_TYPE_AUDIO
-- AUDIOVISUAL_MEDIA_TYPE_VIDEO
-- AUDIOVISUAL_MEDIA_TYPE_ALL
+
+| Name | Property |
+|------|----------|
+| CREDENTIAL_PERSISTENCE_NONE | basicAuthentication.persistence |
+| CREDENTIAL_PERSISTENCE_FOR_SESSION | basicAuthentication.persistence |
+| CREDENTIAL_PERSISTENCE_PERMANENT | basicAuthentication.persistence |
+| CREDENTIAL_PERSISTENCE_SYNCHRONIZABLE | basicAuthentication.persistence |
+| AUDIOVISUAL_MEDIA_TYPE_NONE | mediaTypesRequiringUserActionForPlayback |
+| AUDIOVISUAL_MEDIA_TYPE_AUDIO | mediaTypesRequiringUserActionForPlayback |
+| AUDIOVISUAL_MEDIA_TYPE_VIDEO | mediaTypesRequiringUserActionForPlayback |
+| AUDIOVISUAL_MEDIA_TYPE_ALL | mediaTypesRequiringUserActionForPlayback |
+| CACHE_POLICY_USE_PROTOCOL_CACHE_POLICY | cachePolicy |
+| CACHE_POLICY_RELOAD_IGNORING_LOCAL_CACHE_DATA | cachePolicy |
+| CACHE_POLICY_RETURN_CACHE_DATA_ELSE_LOAD | cachePolicy |
+| CACHE_POLICY_RETURN_CACHE_DATA_DONT_LOAD | cachePolicy |
 
 WebView <-> App Communication
 ---------------
