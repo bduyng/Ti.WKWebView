@@ -1,8 +1,8 @@
-# Ti.WKWebView
+# Ti.WKWebView [![Build Status](https://travis-ci.org/hansemannn/ti.wkwebview.svg?branch=master)](https://travis-ci.org/hansemannn/ti.wkwebview)
 
 Summary
 ---------------
-Ti.WKWebView is an open source project to support the `WKWebView` component with Titanium
+Ti.WKWebView is an open source project to support the `WKWebView` API with Titanium.
 
 Requirements
 ---------------
