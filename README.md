@@ -1,4 +1,4 @@
-# Ti.WKWebView [![Build Status](https://travis-ci.org/hansemannn/ti.wkwebview.svg?branch=master)](https://travis-ci.org/hansemannn/ti.wkwebview)
+# Ti.WKWebView [![Build Status](https://travis-ci.org/hansemannn/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/hansemannn/Ti.WKWebView)
 
 Summary
 ---------------
