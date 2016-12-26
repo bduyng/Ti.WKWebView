@@ -2,7 +2,7 @@ language: objective-c
 osx_image: xcode8.2
 env:
 global:
-    - "MODULE_NAME=ti.wkwebview"
+    - "MODULE_NAME=Ti.WKWebView"
 before_install:
     - MODULE_ROOT=$PWD
     - brew update
