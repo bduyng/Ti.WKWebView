@@ -28,6 +28,8 @@
 		24DE9E1211C5FE74003F90F6 /* TiWkwebviewModuleAssets.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DE9E1011C5FE74003F90F6 /* TiWkwebviewModuleAssets.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AA747D9F0F9514B9006C5449 /* TiWkwebview_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* TiWkwebview_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
+		DB06B2481E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */; };
+		DB06B2491E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		DB59D5181E0ED6BF009A0C43 /* TiWkwebviewWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */; };
 		DB59D5191E0ED6BF009A0C43 /* TiWkwebviewWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		DB59D51A1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */; };
@@ -53,6 +55,8 @@
 		AA747D9E0F9514B9006C5449 /* TiWkwebview_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TiWkwebview_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D2AAC07E0554694100DB518D /* libti.wkwebview.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libti.wkwebview.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewProcessPoolProxy.h; path = Classes/TiWkwebviewProcessPoolProxy.h; sourceTree = "<group>"; };
+		DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewProcessPoolProxy.m; path = Classes/TiWkwebviewProcessPoolProxy.m; sourceTree = "<group>"; };
 		DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewWebView.h; path = Classes/TiWkwebviewWebView.h; sourceTree = "<group>"; };
 		DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewWebView.m; path = Classes/TiWkwebviewWebView.m; sourceTree = "<group>"; };
 		DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewWebViewProxy.h; path = Classes/TiWkwebviewWebViewProxy.h; sourceTree = "<group>"; };
@@ -109,6 +113,8 @@
 				24DE9E1011C5FE74003F90F6 /* TiWkwebviewModuleAssets.m */,
 				24DD6CF71134B3F500162E58 /* TiWkwebviewModule.h */,
 				24DD6CF81134B3F500162E58 /* TiWkwebviewModule.m */,
+				DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */,
+				DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -129,6 +135,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB06B2481E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h in Headers */,
 				AA747D9F0F9514B9006C5449 /* TiWkwebview_Prefix.pch in Headers */,
 				24DD6CF91134B3F500162E58 /* TiWkwebviewModule.h in Headers */,
 				24DE9E1111C5FE74003F90F6 /* TiWkwebviewModuleAssets.h in Headers */,
@@ -210,6 +217,7 @@
 				24DD6CFA1134B3F500162E58 /* TiWkwebviewModule.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* TiWkwebviewModuleAssets.m in Sources */,
 				DB59D5191E0ED6BF009A0C43 /* TiWkwebviewWebView.m in Sources */,
+				DB06B2491E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m in Sources */,
 				DB59D51B1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

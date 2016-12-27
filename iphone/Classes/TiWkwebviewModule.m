@@ -6,6 +6,7 @@
  */
 
 #import "TiWkwebviewModule.h"
+#import "TiWkwebviewProcessPoolProxy.h"
 #import "TiBase.h"
 #import "TiHost.h"
 #import "TiUtils.h"
@@ -29,6 +30,11 @@ return [NSNumber numberWithUnsignedInteger:map];\
 - (NSString *)moduleId
 {
 	return @"ti.wkwebview";
+}
+
+- (TiWkwebviewProcessPoolProxy *)createProcessPool:(id)args
+{
+    return [[TiWkwebviewProcessPoolProxy alloc] _initWithPageContext:[self pageContext]];
 }
 
 MAKE_SYSTEM_PROP(CREDENTIAL_PERSISTENCE_NONE, NSURLCredentialPersistenceNone);

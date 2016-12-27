@@ -7,6 +7,7 @@
 
 #import "TiWkwebviewWebView.h"
 #import "TiWkwebviewWebViewProxy.h"
+#import "TiWkwebviewProcessPoolProxy.h"
 #import "TiFilesystemFileProxy.h"
 #import "TiApp.h"
 #import "SBJSON.h"
@@ -166,13 +167,20 @@
     id allowsPictureInPictureMediaPlayback = [[self proxy] valueForKey:@"allowsPictureInPictureMediaPlayback"];
     id disableContextMenu = [[self proxy] valueForKey:@"disableContextMenu"];
     id mediaTypesRequiringUserActionForPlayback = [[self proxy] valueForKey:@"mediaTypesRequiringUserActionForPlayback"];
-    
+
+    id processPool = [[self proxy] valueForKey:@"processPool"];
+
     if ([TiUtils boolValue:scalePageToFit def:YES]) {
         [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
     }
     
     if ([TiUtils boolValue:disableContextMenu def:NO]) {
         [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
+    }
+    
+    if (processPool) {
+        ENSURE_TYPE(processPool, TiWkwebviewProcessPoolProxy);
+        [config setProcessPool:[(TiWkwebviewProcessPoolProxy*)processPool pool]];
     }
     
     [controller addScriptMessageHandler:self name:@"Ti"];
