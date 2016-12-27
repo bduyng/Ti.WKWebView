@@ -28,7 +28,16 @@ Edit the modules section of your `tiapp.xml` file to include this module:
 
 Features
 ---------------
-**Properties**:
+### API's
+
+| Name | Example|
+|------|--------|
+| WebView | `WK.createWebView(args)` |
+| ProcessPool | `WK.createProcessPool()` |
+
+### WebView
+
+#### Properties
 
 | Name | Type |
 |------|------|
@@ -55,8 +64,9 @@ Features
 | basicAuhentication | Object (username, password, persistence) |
 | cachePolicy | CACHE_POLICY_* |
 | timeout | Double |
+| processPool | ProcessPool |
 
-**Methods**:
+#### Methods
 
 | Name | Parameter | Return |
 |------|-----------|--------|
@@ -71,7 +81,7 @@ Features
 | startListeningToProperties | Properties (Array<String>) | Void |
 | stopListeningToProperties | Properties (Array<String>) | Void |
 
-**Events**:
+#### Events
 
 | Name | Properties |
 |------|------------|
@@ -82,7 +92,7 @@ Features
 | redirect | url, title |
 | error | url, title, error |
 
-**Constants**:
+#### Constants
 
 | Name | Property |
 |------|----------|
@@ -99,8 +109,7 @@ Features
 | CACHE_POLICY_RETURN_CACHE_DATA_ELSE_LOAD | cachePolicy |
 | CACHE_POLICY_RETURN_CACHE_DATA_DONT_LOAD | cachePolicy |
 
-WebView <-> App Communication
----------------
+#### WebView <-> App Communication
 You can send data from the Web View to your native app by posting messages like this:
 ```javascript
 window.webkit.messageHandlers.Ti.postMessage({foo: 'bar'},'*');
@@ -114,6 +123,24 @@ This will trigger the `message` event with the following event keys:
 For sending messages from the app to the Web View, use `evalJS` to call your JS methods like this:
 ```javascript
 webView.evalJS('myJSMethod();');
+```
+
+### Process Pool
+
+Use process pools to share cookies between cookies. Process pools do not take arguments, just pass the same 
+reference to multiple web views. Example:
+```js
+var WK = require('ti.wkwebview');
+
+var pool = WK.createProcessPool();
+
+var firstWebView = WK.createWebView({
+    processPool: pool
+});
+
+var secondWebView = WK.createWebView({
+    processPool: pool
+});
 ```
 
 Author
