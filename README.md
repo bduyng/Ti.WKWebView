@@ -60,8 +60,8 @@ Features
 | backForwardList | Object |
 | ignoreSslError | Boolean |
 | mediaTypesRequiringUserActionForPlayback | AUDIOVISUAL_MEDIA_TYPE_* |
-| preferences | Object (minimumFontSize, javaScriptEnabled, javaScriptCanOpenWindowsAutomatically) |
-| basicAuhentication | Object (username, password, persistence) |
+| preferences | Object<br/>- minimumFontSize (Double)<br/>- javaScriptEnabled (Boolean)<br/>- javaScriptCanOpenWindowsAutomatically (Boolean) |
+| basicAuhentication | Object<br/>- username (String)<br/>- password (String)<br/>- persistence (CREDENTIAL_PERSISTENCE_*) |
 | cachePolicy | CACHE_POLICY_* |
 | timeout | Double |
 | SelectionGranularity | SELECTION_GRANULARITY_* |
