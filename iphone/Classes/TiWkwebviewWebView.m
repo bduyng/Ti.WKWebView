@@ -137,8 +137,7 @@
     [[self webView] setCustomUserAgent:[TiUtils stringValue:value]];
 }
 
-
-- (id)setPreferences_:(id)args
+- (void)setPreferences_:(id)args
 {
     WKPreferences *prefs = [WKPreferences new];
     
@@ -153,6 +152,48 @@
     [[[self webView] configuration] setPreferences:prefs];
 }
 
+- (void)setSelectionGranularity_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[[self webView] configuration] setSelectionGranularity:[TiUtils intValue:value def:WKSelectionGranularityDynamic]];
+}
+
+- (void)setMediaTypesRequiringUserActionForPlayback_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[[self webView] configuration] setMediaTypesRequiringUserActionForPlayback:[TiUtils intValue:value def:WKAudiovisualMediaTypeNone]];
+}
+
+- (void)setSuppressesIncrementalRendering_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[[self webView] configuration] setSuppressesIncrementalRendering:[TiUtils boolValue:value]];
+}
+
+- (void)setAllowsInlineMediaPlayback_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[[self webView] configuration] setAllowsInlineMediaPlayback:[TiUtils boolValue:value]];
+}
+
+- (void)setAllowsAirPlayMediaPlayback_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[[self webView] configuration] setAllowsAirPlayForMediaPlayback:[TiUtils boolValue:value]];
+}
+
+- (void)setAllowsPictureInPictureMediaPlayback_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[[self webView] configuration] setAllowsPictureInPictureMediaPlayback:[TiUtils boolValue:value]];
+}
+
 #pragma mark Utilities
 
 - (WKWebViewConfiguration *)configuration
@@ -160,41 +201,23 @@
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
     WKUserContentController *controller = [[WKUserContentController alloc] init];
 
-    id suppressesIncrementalRendering = [[self proxy] valueForKey:@"suppressesIncrementalRendering"];
-    id scalePageToFit = [[self proxy] valueForKey:@"scalePageToFit"];
-    id allowsInlineMediaPlayback = [[self proxy] valueForKey:@"allowsInlineMediaPlayback"];
-    id allowsAirPlayMediaPlayback = [[self proxy] valueForKey:@"allowsAirPlayMediaPlayback"];
-    id allowsPictureInPictureMediaPlayback = [[self proxy] valueForKey:@"allowsPictureInPictureMediaPlayback"];
-    id disableContextMenu = [[self proxy] valueForKey:@"disableContextMenu"];
-    id mediaTypesRequiringUserActionForPlayback = [[self proxy] valueForKey:@"mediaTypesRequiringUserActionForPlayback"];
-
     id processPool = [[self proxy] valueForKey:@"processPool"];
 
-    if ([TiUtils boolValue:scalePageToFit def:YES]) {
+    if ([TiUtils boolValue:[[self proxy] valueForKey:@"scalePageToFit"] def:YES]) {
         [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
     }
     
-    if ([TiUtils boolValue:disableContextMenu def:NO]) {
+    if ([TiUtils boolValue:[[self proxy] valueForKey:@"disableContextMenu"] def:NO]) {
         [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
     }
     
-    if (processPool) {
+    if ([[self proxy] valueForKey:@"processPool"]) {
         ENSURE_TYPE(processPool, TiWkwebviewProcessPoolProxy);
         [config setProcessPool:[(TiWkwebviewProcessPoolProxy*)processPool pool]];
     }
     
     [controller addScriptMessageHandler:self name:@"Ti"];
     [controller addScriptMessageHandler:self name:@"TiCallback"];
-    
-    [config setSuppressesIncrementalRendering:[TiUtils boolValue:suppressesIncrementalRendering def:NO]];
-
-    [config setMediaTypesRequiringUserActionForPlayback:[TiUtils intValue:mediaTypesRequiringUserActionForPlayback def:WKAudiovisualMediaTypeNone]];
-
-    [config setAllowsInlineMediaPlayback:[TiUtils boolValue:allowsInlineMediaPlayback def:NO]];
-    
-    [config setAllowsAirPlayForMediaPlayback:[TiUtils boolValue:allowsAirPlayMediaPlayback def:NO]];
-
-    [config setAllowsPictureInPictureMediaPlayback:[TiUtils boolValue:allowsPictureInPictureMediaPlayback def:YES]];
     
     [config setUserContentController:controller];
 

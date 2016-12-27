@@ -85,6 +85,45 @@
     };
 }
 
+- (id)preferences
+{
+    return @{
+        @"minimumFontSize": NUMFLOAT([[[[[self webView] webView] configuration] preferences] minimumFontSize]),
+        @"javaScriptEnabled": NUMBOOL([[[[[self webView] webView] configuration] preferences] javaScriptEnabled]),
+        @"javaScriptCanOpenWindowsAutomatically": NUMBOOL([[[[[self webView] webView] configuration] preferences] javaScriptCanOpenWindowsAutomatically]),
+    };
+}
+
+- (id)selectionGranularity
+{
+    return NUMINTEGER([[[[self webView] webView] configuration] selectionGranularity]);
+}
+
+- (id)mediaTypesRequiringUserActionForPlayback
+{
+    return NUMUINTEGER([[[[self webView] webView] configuration] mediaTypesRequiringUserActionForPlayback]);
+}
+
+- (id)suppressesIncrementalRendering
+{
+    NUMBOOL([[[[self webView] webView] configuration] suppressesIncrementalRendering]);
+}
+
+- (id)allowsInlineMediaPlayback
+{
+    NUMBOOL([[[[self webView] webView] configuration] allowsInlineMediaPlayback]);
+}
+
+- (id)allowsAirPlayMediaPlayback
+{
+    NUMBOOL([[[[self webView] webView] configuration] allowsAirPlayForMediaPlayback]);
+}
+
+- (id)allowsPictureInPictureMediaPlaybacke
+{
+    NUMBOOL([[[[self webView] webView] configuration] allowsPictureInPictureMediaPlayback]);
+}
+
 #pragma mark Methods
 
 - (id)isLoading:(id)unused
@@ -204,7 +243,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     for (NSString *property in genericProperties) {
         if ([keyPath isEqualToString:property] && object == [self webView]) {
-            [self fireEvent:property withObject:[[self webView] valueForKey:property]];
+            [self fireEvent:property withObject:@{property:[[self webView] valueForKey:property]}];
             return;
         }
     }

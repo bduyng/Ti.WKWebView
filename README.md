@@ -64,6 +64,7 @@ Features
 | basicAuhentication | Object (username, password, persistence) |
 | cachePolicy | CACHE_POLICY_* |
 | timeout | Double |
+| SelectionGranularity | SELECTION_GRANULARITY_* |
 | processPool | ProcessPool |
 
 #### Methods
@@ -108,6 +109,8 @@ Features
 | CACHE_POLICY_RELOAD_IGNORING_LOCAL_CACHE_DATA | cachePolicy |
 | CACHE_POLICY_RETURN_CACHE_DATA_ELSE_LOAD | cachePolicy |
 | CACHE_POLICY_RETURN_CACHE_DATA_DONT_LOAD | cachePolicy |
+| SELECTION_GRANULARITY_AUTOMATIC | selectionGranularity |
+| SELECTION_GRANULARITY_CHARACTER | selectionGranularity |
 
 #### WebView <-> App Communication
 You can send data from the Web View to your native app by posting messages like this:
@@ -123,6 +126,21 @@ This will trigger the `message` event with the following event keys:
 For sending messages from the app to the Web View, use `evalJS` to call your JS methods like this:
 ```javascript
 webView.evalJS('myJSMethod();');
+```
+
+#### Generic Property Observing
+You can listen to changes in some of the native properties (see the native KVO-capability). Example:
+```js
+// Start listening for changes
+webView.startListeningToProperties(['title']);
+
+// Add an event listener for the change
+webView.addEventListener('title', function(e) {
+    // Check for e.title
+});
+
+// Remove listening to changes (remove the event listener as well to keep it more clean)
+webView.stopListeningToProperties(['title']);
 ```
 
 ### Process Pool
