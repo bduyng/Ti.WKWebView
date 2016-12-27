@@ -6,9 +6,9 @@ Ti.WKWebView is an open source project to support the `WKWebView` API with Titan
 
 Requirements
 ---------------
-- Titanium Mobile SDK 6.0.0.GA or later
+- Titanium Mobile SDK 5.0.0.GA or later
 - iOS 9 or later
-- Xcode 8.0 or later
+- Xcode 7.0 or later
 
 Download + Setup
 ---------------
