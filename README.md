@@ -16,7 +16,7 @@ Download + Setup
 
 ### Download
 * [Stable release](https://github.com/hansemannn/ti.wkwebview/releases)
-* Install from gitTio    <a href="http://gitt.io/component/ti.wkwebview" target="_blank"><img src="http://gitt.io/badge@2x.png" width="120" height="18" alt="Available on gitTio" /></a>
+* [![gitTio](http://hans-knoechel.de/shields/shield-gittio.svg)](http://gitt.io/component/ti.wkwebview)
 
 ### Setup
 Unpack the module and place it inside the `modules/iphone` folder of your project.
