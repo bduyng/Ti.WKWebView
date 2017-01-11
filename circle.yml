@@ -1,0 +1,23 @@
+machine:
+  xcode:
+    version: 8.2
+
+dependencies:
+  pre:
+    - brew update
+    - brew install nvm
+    - source $(brew --prefix nvm)/nvm.sh
+    - nvm install 4
+    - npm config delete prefix
+    - nvm use --delete-prefix v4.4.7 4
+    
+test:
+  override:
+    - cd iphone/
+    - curl -o install.sh https://raw.githubusercontent.com/hansemannn/ci/v8/travis/install.sh
+    - source install.sh -s "--branch master"
+    - curl -o script.sh https://raw.githubusercontent.com/hansemannn/ci/v8/travis/script.sh
+    - source script.sh
+  post:
+    - curl -o deploy.sh https://raw.githubusercontent.com/hansemannn/ci/master/travis/deploy.sh
+    - source deploy.sh
