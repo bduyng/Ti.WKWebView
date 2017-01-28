@@ -23,17 +23,17 @@
 
 /* Begin PBXBuildFile section */
 		24DD6CF91134B3F500162E58 /* TiWkwebviewModule.h in Headers */ = {isa = PBXBuildFile; fileRef = 24DD6CF71134B3F500162E58 /* TiWkwebviewModule.h */; };
-		24DD6CFA1134B3F500162E58 /* TiWkwebviewModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DD6CF81134B3F500162E58 /* TiWkwebviewModule.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		24DD6CFA1134B3F500162E58 /* TiWkwebviewModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DD6CF81134B3F500162E58 /* TiWkwebviewModule.m */; };
 		24DE9E1111C5FE74003F90F6 /* TiWkwebviewModuleAssets.h in Headers */ = {isa = PBXBuildFile; fileRef = 24DE9E0F11C5FE74003F90F6 /* TiWkwebviewModuleAssets.h */; };
-		24DE9E1211C5FE74003F90F6 /* TiWkwebviewModuleAssets.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DE9E1011C5FE74003F90F6 /* TiWkwebviewModuleAssets.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		24DE9E1211C5FE74003F90F6 /* TiWkwebviewModuleAssets.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DE9E1011C5FE74003F90F6 /* TiWkwebviewModuleAssets.m */; };
 		AA747D9F0F9514B9006C5449 /* TiWkwebview_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* TiWkwebview_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 		DB06B2481E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */; };
-		DB06B2491E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		DB06B2491E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */; };
 		DB59D5181E0ED6BF009A0C43 /* TiWkwebviewWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */; };
-		DB59D5191E0ED6BF009A0C43 /* TiWkwebviewWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		DB59D5191E0ED6BF009A0C43 /* TiWkwebviewWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */; };
 		DB59D51A1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */; };
-		DB59D51B1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5171E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		DB59D51B1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5171E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -237,6 +237,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DSTROOT = /tmp/TiWkwebview.dst;
@@ -277,6 +278,7 @@
 			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/TiWkwebview.dst;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_MODEL_TUNING = G5;
