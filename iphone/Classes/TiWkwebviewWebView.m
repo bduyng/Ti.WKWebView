@@ -67,6 +67,15 @@
     }
 }
 
+- (void)setBackgroundColor_:(id)value
+{
+    ENSURE_TYPE(value, NSString);
+    [[self proxy] replaceValue:value forKey:@"backgroundColor" notification:NO];
+   
+    [[self webView] setOpaque:NO];
+    [[self webView] setBackgroundColor:[[TiUtils colorValue:value] color]];
+}
+
 - (void)setData_:(id)value
 {
     [[self proxy] replaceValue:value forKey:@"data" notification:NO];
