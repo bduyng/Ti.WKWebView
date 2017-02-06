@@ -2,7 +2,7 @@ var WK = require('ti.wkwebview');
 
 var win = Ti.UI.createWindow({
     backgroundColor: "#fff",
-	title: "WKWebView"
+    title: "WKWebView"
 });
 
 var progress = Ti.UI.createProgressBar({
@@ -13,13 +13,13 @@ var progress = Ti.UI.createProgressBar({
 });
 
 var nav = Ti.UI.iOS.createNavigationWindow({
-	window: win
+    window: win
 });
- 
+
 var webView = WK.createWebView({
     url: "remote_test.html"
-//	url: "https://appcelerator.com",
-// 	html: "<!DOCTYPE html><html><head></head><body><p style='font-size: 72px, color: red;'>Hello world!</p><script type=\"text/javascript\">window.webkit.messageHandlers.Ti.postMessage({'foo': 'bar'});</script></body></html>"
+    //	url: "https://appcelerator.com",
+    // 	html: "<!DOCTYPE html><html><head></head><body><p style='font-size: 72px, color: red;'>Hello world!</p><script type=\"text/javascript\">window.webkit.messageHandlers.Ti.postMessage({'foo': 'bar'});</script></body></html>"
 });
 
 webView.addEventListener("message", function(e) {
@@ -29,30 +29,30 @@ webView.addEventListener("message", function(e) {
 });
 
 webView.addEventListener("progress", function(e) {
-    
-    if (e.progress >= 1.0) {
+    if (e.value >= 1.0) {
         progress.setValue(0.0);
         progress.visible && progress.hide();
-    } else {
-        progress.setValue(e.progress);
+    } else  {
+        progress.setValue(e.value);
         !progress.visible && progress.show();
     }
 });
- 
+
 webView.addEventListener("beforeload", function(e) {
-	Ti.API.info("Will load URL: " + e.url);
+    Ti.API.info("Will load URL: " + e.url);
 });
- 
+
 webView.addEventListener("loadprogress", function(e) {
-	Ti.API.info("Did receive first content of URL: " + e.url);
+    Ti.API.info("Did receive first content of URL: " + e.url);
 });
- 
+
 webView.addEventListener("load", function(e) {
-	Ti.API.info("Did load URL: " + e.url);
+    Ti.API.info("Did load URL: " + e.url);
+    win.setTitle(e.title);
 });
- 
+
 var btn = Ti.UI.createButton({
-   title: 'evalJS'
+    title: 'evalJS'
 });
 
 btn.addEventListener('click', function() {
