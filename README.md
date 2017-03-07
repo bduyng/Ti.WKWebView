@@ -1,5 +1,5 @@
 # Ti.WKWebView 
-[![Build Status](https://travis-ci.org/hansemannn/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/hansemannn/Ti.WKWebView) [![License](http://hans-knoechel.de/shields/shield-license.svg)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg)](http://tislack.org)
+[![Build Status](https://travis-ci.org/appcelerator-modules/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/appcelerator-modules/Ti.WKWebView) [![License](http://hans-knoechel.de/shields/shield-license.svg)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg)](http://tislack.org)
 
 Summary
 ---------------
@@ -15,7 +15,7 @@ Download + Setup
 ---------------
 
 ### Download
-* [Stable release](https://github.com/hansemannn/ti.wkwebview/releases)
+* [Stable release](https://github.com/appcelerator-modules/ti.wkwebview/releases)
 * [![gitTio](http://hans-knoechel.de/shields/shield-gittio.svg)](http://gitt.io/component/ti.wkwebview)
 
 ### Setup
@@ -164,7 +164,7 @@ var secondWebView = WK.createWebView({
 
 Author
 ---------------
-Hans Knoechel ([@hansemannnn](https://twitter.com/hansemannnn) / [Web](http://hans-knoechel.de))
+Hans Knoechel ([@hansemannnn](https://twitter.com/hansemannnn) / [Web](http://hans-knoechel.de)) for Appcelerator
 
 License
 ---------------
@@ -172,4 +172,4 @@ Apache 2.0
 
 Contributing
 ---------------
-Code contributions are greatly appreciated, please submit a new [pull request](https://github.com/hansemannn/ti.wkwebview/pull/new/master)!
+Code contributions are greatly appreciated, please submit a new [pull request](https://github.com/appcelerator-modules/ti.wkwebview/pull/new/master)!
