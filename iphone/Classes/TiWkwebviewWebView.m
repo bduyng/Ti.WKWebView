@@ -226,7 +226,6 @@
     }
     
     [controller addScriptMessageHandler:self name:@"Ti"];
-    [controller addScriptMessageHandler:self name:@"TiCallback"];
     
     [config setUserContentController:controller];
 
