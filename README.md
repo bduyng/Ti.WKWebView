@@ -116,18 +116,23 @@ Features
 #### WebView <-> App Communication
 You can send data from the Web View to your native app by posting messages like this:
 ```javascript
-window.webkit.messageHandlers.Ti.postMessage({foo: 'bar'},'*');
+window.webkit.messageHandlers.Ti.postMessage({message: 'Titanium rocks!'},'*');
 ```
-This will trigger the `message` event with the following event keys:
-- url
-- message
-- name
-- isMainFrame
+Please note that you should use the `Ti` message handler to ensure the `message` event is 
+triggered. This also ensures that your app does not receive unwanted messages by remote pages.
+
+After sending the message from your HTML file, it will trigger the `message` event with the 
+following event keys:
+- url (The url of the triggered message)
+- body (The message body. In this case: `{message: 'Titanium rocks'}`
+- name (The name of the message. In this case: 'Ti')
+- isMainFrame (A boolean determing if the messsage was sent from the main-frame)
 
 For sending messages from the app to the Web View, use `evalJS` to call your JS methods like this:
 ```javascript
 webView.evalJS('myJSMethod();');
 ```
+Check out the example file for sending and receiving message back and forth.
 
 #### Generic Property Observing
 You can listen to changes in some of the native properties (see the native KVO-capability). Example:
@@ -146,7 +151,7 @@ webView.stopListeningToProperties(['title']);
 
 ### Process Pool
 
-Use process pools to share cookies between cookies. Process pools do not take arguments, just pass the same 
+Use process pools to share cookies between web views. Process pools do not take arguments, just pass the same 
 reference to multiple web views. Example:
 ```js
 var WK = require('ti.wkwebview');
