@@ -224,8 +224,8 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     for (NSString *property in genericProperties) {
-        if ([keyPath isEqualToString:property] && object == [self webView]) {
-            [self fireEvent:property withObject:@{property:[[self webView] valueForKey:property]}];
+        if ([self _hasListeners:property] && [keyPath isEqualToString:property] && object == [[self webView] webView]) {
+            [self fireEvent:property withObject:@{@"value": NULL_IF_NIL([[[self webView] webView] valueForKey:property])}];
             return;
         }
     }

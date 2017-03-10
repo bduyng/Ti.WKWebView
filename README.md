@@ -142,7 +142,7 @@ webView.startListeningToProperties(['title']);
 
 // Add an event listener for the change
 webView.addEventListener('title', function(e) {
-    // Check for e.title
+    // Check for e.value
 });
 
 // Remove listening to changes (remove the event listener as well to keep it more clean)
