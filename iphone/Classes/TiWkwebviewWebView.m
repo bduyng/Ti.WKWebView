@@ -93,7 +93,9 @@
     if ([value isKindOfClass:[TiBlob class]]) {
         data = [(TiBlob *)value data];
     } else if ([value isKindOfClass:[TiFile class]]) {
+#ifdef USE_TI_FILESYSTEM
         data = [[(TiFilesystemFileProxy *)value blob] data];
+#endif
     } else {
         NSLog(@"[ERROR] Ti.UI.iOS.WebView.data can only be a TiBlob or TiFile object, was %@", [(TiProxy *)value apiName]);
     }
@@ -286,10 +288,11 @@
 
 - (id)resolveFile:(id)arg
 {
+#ifdef USE_TI_FILESYSTEM
     if ([arg isKindOfClass:[TiFilesystemFileProxy class]]) {
         return [(TiFilesystemFileProxy *)arg path];
     }
-    
+#endif
     return [TiUtils stringValue:arg];
 }
 
