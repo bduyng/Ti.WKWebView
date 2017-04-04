@@ -350,11 +350,8 @@
     
     // Allow invalid certificates if specified
     if ([TiUtils boolValue:[[self proxy] valueForKey:@"ignoreSslError"] def:NO]) {
-        SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
-        CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
-        SecTrustSetExceptions (serverTrust, exceptions);
-        CFRelease (exceptions);
-        completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+        NSURLCredential * credential = [[NSURLCredential alloc] initWithTrust:[challenge protectionSpace].serverTrust];
+        completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
         
         return;
     }
@@ -387,7 +384,13 @@
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
     if ([[self proxy] _hasListeners:@"error"]) {
-        [[self proxy] fireEvent:@"error" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title, @"error": [error localizedDescription]}];
+        NSURL *errorURL = webView.URL;
+
+        if (errorURL.absoluteString == nil) {
+            errorURL = [NSURL URLWithString:[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]];
+        }
+        
+        [[self proxy] fireEvent:@"error" withObject:@{@"url": NULL_IF_NIL(errorURL ? errorURL.absoluteString : nil), @"title": NULL_IF_NIL(webView.title), @"error": [error localizedDescription]}];
     }
 }
 
