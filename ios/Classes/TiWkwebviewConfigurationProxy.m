@@ -11,22 +11,22 @@
 #import "TiWkwebviewProcessPoolProxy.h"
 #import "TiUtils.h"
 
-@implementation TiWkwebviewConfigurationProxy {
-    WKWebViewConfiguration *configuration;
-}
+@implementation TiWkwebviewConfigurationProxy
 
 - (WKWebViewConfiguration *)configuration
 {
-    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-    
-    id processPool = [self valueForKey:@"processPool"];
-    
-    if ([self valueForKey:@"processPool"]) {
-        ENSURE_TYPE(processPool, TiWkwebviewProcessPoolProxy);
-        [config setProcessPool:[(TiWkwebviewProcessPoolProxy *)processPool pool]];
+    if (configuration == nil) {
+        configuration = [[WKWebViewConfiguration alloc] init];
+        
+        id processPool = [self valueForKey:@"processPool"];
+        
+        if ([self valueForKey:@"processPool"]) {
+            ENSURE_TYPE(processPool, TiWkwebviewProcessPoolProxy);
+            [configuration setProcessPool:[(TiWkwebviewProcessPoolProxy *)processPool pool]];
+        }
     }
     
-    return config;
+    return configuration;
 }
 
 - (void)setPreferences:(id)args
