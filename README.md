@@ -61,6 +61,7 @@ Features
 | cachePolicy | CACHE_POLICY_* |
 | timeout | Double |
 | selectionGranularity | SELECTION_GRANULARITY_* |
+| allowedURLSchemes | Array<String> |
 
 #### Methods
 
