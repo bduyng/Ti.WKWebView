@@ -10,6 +10,7 @@
 
 @interface TiWkwebviewWebViewProxy : TiViewProxy {
     NSMutableArray<NSString *> *genericProperties;
+    NSArray *_allowedURLSchemes;
 }
 
 @end

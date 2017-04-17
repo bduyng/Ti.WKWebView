@@ -124,6 +124,22 @@
     NUMBOOL([[[[self webView] webView] configuration] allowsPictureInPictureMediaPlayback]);
 }
 
+- (id)allowedURLSchemes
+{
+    return _allowedURLSchemes;
+}
+    
+#pragma mark Setter
+    
+- (void)setAllowedURLSchemes:(NSArray *)schemes
+{
+    for (id scheme in schemes) {
+        ENSURE_TYPE(scheme, NSString);
+    }
+    
+    _allowedURLSchemes = schemes;
+}
+
 #pragma mark Methods
 
 - (id)isLoading:(id)unused

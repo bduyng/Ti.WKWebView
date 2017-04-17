@@ -416,6 +416,19 @@
     [[TiApp app] showModalController:alertController animated:YES];
 }
 
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler
+{
+    if ([[[self proxy] valueForKey:@"allowedURLSchemes"] containsObject:navigationAction.request.URL.scheme]) {
+        if ([[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL]) {
+            [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+            decisionHandler(WKNavigationActionPolicyCancel);
+            return;
+        }
+    }
+    
+    decisionHandler(WKNavigationActionPolicyAllow);
+}
+
 static NSString * UIKitLocalizedString(NSString *string)
 {
     NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
