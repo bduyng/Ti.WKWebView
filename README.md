@@ -49,11 +49,11 @@ Features
 | allowsLinkPreview | Boolean |
 | scrollsToTop | Boolean |
 | disableContextMenu | Boolean |
-| userAgent | String|
+| userAgent | String |
 | url | String |
 | data | Ti.Blob, Ti.File |
-| html | Boolean |
-| title | Boolean |
+| html | String |
+| title | String |
 | progress | Double |
 | backForwardList | Object |
 | ignoreSslError | Boolean |
@@ -61,7 +61,7 @@ Features
 | cachePolicy | CACHE_POLICY_* |
 | timeout | Double |
 | selectionGranularity | SELECTION_GRANULARITY_* |
-| allowedURLSchemes | Array<String> |
+| allowedURLSchemes | Array\<String\> |
 
 #### Methods
 
@@ -128,6 +128,15 @@ For sending messages from the app to the Web View, use `evalJS` to call your JS 
 webView.evalJS('myJSMethod();');
 ```
 Check out the example file for sending and receiving message back and forth.
+
+#### Inter-App Communication
+For using the URL schemes `mailto`, `tel`, `sms` and `itms-services` you only have to set the `allowedURLSchemes` property. Other URL schemes (i.e. `fb`) additionally need the corresponding `LSApplicationQueriesSchemes` key in the iOS plist dictionary of your `tiapp.xml`:
+```xml
+<key>LSApplicationQueriesSchemes</key>
+<array>
+    <string>fb</string>
+</array>
+```
 
 #### Generic Property Observing
 You can listen to changes in some of the native properties (see the native KVO-capability). Example:
