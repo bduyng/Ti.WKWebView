@@ -1,5 +1,5 @@
 # Ti.WKWebView 
-[![Build Status](https://travis-ci.org/appcelerator-modules/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/appcelerator-modules/Ti.WKWebView) [![License](http://hans-knoechel.de/shields/shield-license.svg?v=2)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg?v=2)](http://tislack.org)
+[![Build Status](https://travis-ci.org/appcelerator-modules/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/appcelerator-modules/Ti.WKWebView) [![License](http://hans-knoechel.de/shields/shield-license.svg?v=2)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg?v=3)](http://tislack.org)
 
 Summary
 ---------------
