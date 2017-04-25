@@ -27,7 +27,10 @@
         WKWebViewConfiguration *config = configProxy ? [configProxy configuration] : [[WKWebViewConfiguration alloc] init];
         WKUserContentController *controller = [[WKUserContentController alloc] init];
         
-        if ([TiUtils boolValue:[[self proxy] valueForKey:@"scalePageToFit"] def:YES]) {
+        if ([TiUtils boolValue:[[self proxy] valueForKey:@"disableZoom"] def:NO]) {
+            [controller addUserScript:[TiWkwebviewWebView userScriptDisableZoom]];
+        }
+        else if ([TiUtils boolValue:[[self proxy] valueForKey:@"scalePageToFit"] def:YES]) {
             [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
         }
         
@@ -172,6 +175,16 @@
     NSString *source = @"var meta = document.createElement('meta'); \
     meta.setAttribute('name', 'viewport'); \
     meta.setAttribute('content', 'width=device-width'); \
+    document.getElementsByTagName('head')[0].appendChild(meta);";
+    
+    return [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+}
+
++ (WKUserScript *)userScriptDisableZoom
+{
+    NSString *source = @"var meta = document.createElement('meta'); \
+    meta.setAttribute('name', 'viewport'); \
+    meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'); \
     document.getElementsByTagName('head')[0].appendChild(meta);";
     
     return [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
