@@ -45,6 +45,7 @@ Features
 |------|------|
 | disableBounce | Boolean |
 | scalePageToFit | Boolean |
+| disableZoom | Boolean |
 | allowsBackForwardNavigationGestures | Boolean |
 | allowsLinkPreview | Boolean |
 | scrollsToTop | Boolean |
@@ -74,7 +75,7 @@ Features
 | canGoBack | - | Boolean |
 | canGoForward | - | Boolean |
 | isLoading | - | Boolean |
-| evalJS | Code (String), Callback (Function) | Void|
+| evalJS | Code (String), Callback (Function) | Void |
 | startListeningToProperties | Properties (Array<String>) | Void |
 | stopListeningToProperties | Properties (Array<String>) | Void |
 
