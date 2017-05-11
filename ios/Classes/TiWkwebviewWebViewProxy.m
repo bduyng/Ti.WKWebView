@@ -229,6 +229,27 @@
     }];
 }
 
+- (NSString *)evalJSSync:(id)args
+{
+    NSString *code = nil;
+    
+    __block NSString *resultString = nil;
+    __block BOOL finishedEvaluation = NO;
+    
+    ENSURE_ARG_AT_INDEX(code, args, 0, NSString);
+    
+    [[[self webView] webView] evaluateJavaScript:code completionHandler:^(id result, NSError *error) {
+        resultString = NULL_IF_NIL(result);
+        finishedEvaluation = YES;
+    }];
+    
+    while (!finishedEvaluation) {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+    }
+    
+    return resultString;
+}
+
 #pragma mark Utilities
 
 + (NSDictionary *)dictionaryFromBackForwardItem:(WKBackForwardListItem *)item

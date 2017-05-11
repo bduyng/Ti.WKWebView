@@ -76,6 +76,7 @@ Features
 | canGoForward | - | Boolean |
 | isLoading | - | Boolean |
 | evalJS | Code (String), Callback (Function) | Void |
+| evalJSSync | Code (String) | String |
 | startListeningToProperties | Properties (Array<String>) | Void |
 | stopListeningToProperties | Properties (Array<String>) | Void |
 
@@ -129,6 +130,12 @@ For sending messages from the app to the Web View, use `evalJS` to call your JS 
 webView.evalJS('myJSMethod();');
 ```
 Check out the example file for sending and receiving message back and forth.
+
+> **Note**: Since 2.3.0, this module also supports synchronous communication via `evalJSSync`.
+> Instead of `evalJS`, it takes only one parameter (the code to evaluate) and no callback. Instead,
+> it returns the JavaScript evaluation result directly. While we understand there might be use-cases for
+> this functionality, we highly recommend to use asynchronous communication instead, since synchronous method
+> calls with block the user interface and may cause in an app-termination for long-running evaluations.
 
 #### Inter-App Communication
 For using the URL schemes `mailto`, `tel`, `sms` and `itms-services` you only have to set the `allowedURLSchemes` property. Other URL schemes (i.e. `fb`) additionally need the corresponding `LSApplicationQueriesSchemes` key in the iOS plist dictionary of your `tiapp.xml`:
