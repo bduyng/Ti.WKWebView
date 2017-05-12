@@ -63,6 +63,8 @@ Features
 | timeout | Double |
 | selectionGranularity | SELECTION_GRANULARITY_* |
 | allowedURLSchemes | Array\<String\> |
+| touchEnabled | Boolean |
+| willHandleTouches | Boolean |
 
 #### Methods
 
