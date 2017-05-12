@@ -16,6 +16,8 @@
     TiDimension height;
     CGFloat autoHeight;
     CGFloat autoWidth;
+    
+    BOOL willHandleTouches;
 }
 
 - (WKWebView *) webView;

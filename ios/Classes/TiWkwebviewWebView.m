@@ -40,6 +40,7 @@
         
         [controller addScriptMessageHandler:self name:@"Ti"];
         [config setUserContentController:controller];
+        willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
         
         _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:config];
         
@@ -55,6 +56,29 @@
     }
     
     return _webView;
+}
+
+-(UIView*)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    UIView *view = [super hitTest:point withEvent:event];
+    if (([self hasTouchableListener]) && willHandleTouches) {
+        UIView *superView = [view superview];
+        UIView *parentSuperView = [superView superview];
+        
+        if ((view == [self webView]) || (superView == [self webView]) || (parentSuperView == [self webView])) {
+            return self;
+        }
+    }
+    
+    return view;
+}
+
+-(void)setWillHandleTouches_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    [[self proxy] replaceValue:value forKey:@"willHandleTouches" notification:NO];
+    willHandleTouches = [TiUtils boolValue:value def:YES];
 }
 
 #pragma mark Public API's
