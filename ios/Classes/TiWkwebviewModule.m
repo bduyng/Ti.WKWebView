@@ -21,6 +21,10 @@
 return [NSNumber numberWithUnsignedInteger:map];\
 }\
 
+NSString * const kTiWKFireEvent = @"kTiWKFireEvent";
+NSString * const kTiWKAddEventListener = @"kTiWKAddEventListener";
+NSString * const kTiWKEventCallback = @"kTiWKEventCallback";
+
 @implementation TiWkwebviewModule
 
 #pragma mark Internal
@@ -42,7 +46,7 @@ return [NSNumber numberWithUnsignedInteger:map];\
 
 - (void)startup
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPassCallback:) name:@"TiEventCallback" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPassCallback:) name:kTiWKEventCallback object:nil];
     
     [super startup];
 }
@@ -52,7 +56,7 @@ return [NSNumber numberWithUnsignedInteger:map];\
     NSString *name = [args objectAtIndex:0];
     NSDictionary *payload = [args objectAtIndex:1];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"TiFireEvent" object:nil userInfo:@{@"name": name, @"payload": payload}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKFireEvent object:nil userInfo:@{@"name": name, @"payload": payload}];
 }
 
 - (void)addEventListener:(NSArray *)args
@@ -60,7 +64,7 @@ return [NSNumber numberWithUnsignedInteger:map];\
     NSString *name = [args objectAtIndex:0];
     KrollCallback *callback = [args objectAtIndex:1];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"TiAddEventListener" object:nil userInfo:@{@"name": name, @"callback": callback}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKAddEventListener object:nil userInfo:@{@"name": name, @"callback": callback}];
 }
 
 - (void)removeEventListener:(NSArray *)args

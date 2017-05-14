@@ -16,6 +16,10 @@
 #import "SBJSON.h"
 #import "TiWkwebviewModule.h"
 
+extern NSString * const kTiWKFireEvent;
+extern NSString * const kTiWKAddEventListener;
+extern NSString * const kTiWKEventCallback;
+
 @implementation TiWkwebviewWebView
 
 #pragma mark Internal API's
@@ -62,9 +66,9 @@
 
 - (void)registerNotificationCenter
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFireEvent:) name:@"TiFireEvent" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFireEvent:) name:kTiWKFireEvent object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didAddEventListener:) name:@"TiAddEventListener" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didAddEventListener:) name:kTiWKAddEventListener object:nil];
 }
 
 - (void)didFireEvent:(NSNotification *)notification
@@ -266,6 +270,9 @@
                             addEventListener: function(name, callback) { \
                                 callbacks[name] = callback; \
                             } \
+                            removeEventListener: function(name, callback) { \
+                                delete callbacks[name]; \
+                            } \
                         }";
     
     return [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
@@ -392,7 +399,7 @@
         NSDictionary *payload = [[message body] objectForKey:@"payload"];
         
         if ([[TiCallbackManager sharedInstance] hasCallbackForName:name]) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"TiEventCallback" object:nil userInfo:@{@"name": name, @"payload": payload}];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKEventCallback object:nil userInfo:@{@"name": name, @"payload": payload}];
             return;
         }
     }
