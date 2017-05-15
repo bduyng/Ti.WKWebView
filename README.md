@@ -80,6 +80,7 @@ Features
 | evalJS | Code (String), Callback (Function) | Void |
 | evalJSSync | Code (String) | String |
 | startListeningToProperties | Array<String> | Void |
+| stopListeningToProperties | Array<String> | Void |
 | fireEvent | Name (String), Payload (Object) | Void |
 | addEventListener | Name (String), Callback (Function) | Void |
 | removeEventListener | Name (String), Callback (Function) | Void |
