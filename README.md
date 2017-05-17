@@ -20,8 +20,11 @@ Download + Setup
 
 ### Setup
 Unpack the module and place it inside the `modules/iphone` folder of your project.
-Edit the modules section of your `tiapp.xml` file to include this module:
+Edit the iOS and modules section of your `tiapp.xml` file to include this module:
 ```xml
+<ios>
+    <min-ios-ver>9.0</min-ios-ver>
+</ios>
 <modules>
     <module>ti.wkwebview</module>
 </modules>
