@@ -5,18 +5,25 @@
  * Please see the LICENSE included with this distribution for details.
  */
 
+#import <WebKit/WebKit.h>
+
 #import "TiWkwebviewModule.h"
 #import "TiWkwebviewProcessPoolProxy.h"
 #import "TiBase.h"
 #import "TiHost.h"
 #import "TiUtils.h"
-#import <WebKit/WebKit.h>
+
+#import "TiCallbackManager.h"
 
 #define MAKE_SYSTEM_UINTEGER(name,map) \
 -(NSNumber*)name \
 {\
 return [NSNumber numberWithUnsignedInteger:map];\
 }\
+
+NSString * const kTiWKFireEvent = @"kTiWKFireEvent";
+NSString * const kTiWKAddEventListener = @"kTiWKAddEventListener";
+NSString * const kTiWKEventCallback = @"kTiWKEventCallback";
 
 @implementation TiWkwebviewModule
 
@@ -35,6 +42,49 @@ return [NSNumber numberWithUnsignedInteger:map];\
 - (TiWkwebviewProcessPoolProxy *)createProcessPool:(id)args
 {
     return [[TiWkwebviewProcessPoolProxy alloc] _initWithPageContext:[self pageContext]];
+}
+
+- (void)startup
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPassCallback:) name:kTiWKEventCallback object:nil];
+    
+    [super startup];
+}
+
+- (void)fireEvent:(id)args
+{
+    NSString *name = [args objectAtIndex:0];
+    NSDictionary *payload = [args objectAtIndex:1];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKFireEvent object:nil userInfo:@{@"name": name, @"payload": payload}];
+}
+
+- (void)addEventListener:(NSArray *)args
+{
+    NSString *name = [args objectAtIndex:0];
+    KrollCallback *callback = [args objectAtIndex:1];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKAddEventListener object:nil userInfo:@{@"name": name, @"callback": callback}];
+}
+
+- (void)removeEventListener:(NSArray *)args
+{
+    NSString *name = [args objectAtIndex:0];
+    KrollCallback *callback = [args objectAtIndex:1];
+    
+    [[TiCallbackManager sharedInstance] removeCallbackWithName:name];
+}
+
+- (void)didPassCallback:(NSNotification *)notification
+{
+    NSDictionary *userInfo = [notification userInfo];
+    
+    NSDictionary *payload = [userInfo objectForKey:@"payload"];
+    NSString *name = [userInfo objectForKey:@"name"];
+    
+    KrollCallback *callback = [[TiCallbackManager sharedInstance] callbackForName:name];
+        
+    [callback call:@[payload] thisObject:self];
 }
 
 MAKE_SYSTEM_PROP(CREDENTIAL_PERSISTENCE_NONE, NSURLCredentialPersistenceNone);

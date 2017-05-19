@@ -11,8 +11,14 @@
 
 #import "TiFilesystemFileProxy.h"
 #import "TiApp.h"
+#import "TiCallbackManager.h"
 
 #import "SBJSON.h"
+#import "TiWkwebviewModule.h"
+
+extern NSString * const kTiWKFireEvent;
+extern NSString * const kTiWKAddEventListener;
+extern NSString * const kTiWKEventCallback;
 
 @implementation TiWkwebviewWebView
 
@@ -21,8 +27,6 @@
 - (WKWebView *)webView
 {
     if (_webView == nil) {
-        [[TiApp app] attachXHRBridgeIfRequired];
-        
         TiWkwebviewConfigurationProxy *configProxy = [[self proxy] valueForKey:@"configuration"];
         WKWebViewConfiguration *config = configProxy ? [configProxy configuration] : [[WKWebViewConfiguration alloc] init];
         WKUserContentController *controller = [[WKUserContentController alloc] init];
@@ -37,6 +41,8 @@
         if ([TiUtils boolValue:[[self proxy] valueForKey:@"disableContextMenu"] def:NO]) {
             [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
         }
+
+        [controller addUserScript:[TiWkwebviewWebView userScriptTitaniumInjection]];
         
         [controller addScriptMessageHandler:self name:@"Ti"];
         [config setUserContentController:controller];
@@ -58,7 +64,51 @@
     return _webView;
 }
 
--(UIView*)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+- (void)registerNotificationCenter
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFireEvent:) name:kTiWKFireEvent object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didAddEventListener:) name:kTiWKAddEventListener object:nil];
+}
+
+- (void)didFireEvent:(NSNotification *)notification
+{
+    NSDictionary *event = [notification userInfo];
+    
+    NSString *name = [event objectForKey:@"name"];
+    NSDictionary *payload = [event objectForKey:@"payload"];
+    
+    NSError *jsonError;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                       options:(NSJSONWritingOptions)0
+                                                         error:&jsonError];
+    
+    if (!jsonData) {
+        NSLog(@"[ERROR] Error firing event '%@': %@", name, jsonError.localizedDescription);
+        return;
+    } else {
+        NSString *jsonPayload = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        
+        [[self webView] evaluateJavaScript:[NSString stringWithFormat:@"WK.fireEvent('%@', %@)", name, jsonPayload]
+                         completionHandler:^(id result, NSError *error) {
+                             if (error != nil) {
+                                 NSLog(@"[ERROR] Error firing event '%@': %@", name, error.localizedDescription);
+                             }
+                         }];
+    }
+}
+
+- (void)didAddEventListener:(NSNotification *)notification
+{
+    NSDictionary *event = [notification userInfo];
+    
+    NSString *name = [event objectForKey:@"name"];
+    KrollCallback *callback = [event objectForKey:@"callback"];
+
+    [[TiCallbackManager sharedInstance] addCallback:callback withName:name];
+}
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *view = [super hitTest:point withEvent:event];
     if (([self hasTouchableListener]) && willHandleTouches) {
@@ -204,6 +254,30 @@
     return [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
 }
 
++ (WKUserScript *)userScriptTitaniumInjection
+{
+    NSString *source = @"var callbacks = {}; var WK = { \
+                            fireEvent: function(name, payload) { \
+                                var _payload = payload; \
+                                if (typeof payload === 'string') { \
+                                    _payload = JSON.parse(payload); \
+                                } \
+                                if (callbacks[name]) { \
+                                    callbacks[name](_payload); \
+                                } \
+                                window.webkit.messageHandlers.Ti.postMessage({name: name, payload: _payload},'*'); \
+                            }, \
+                            addEventListener: function(name, callback) { \
+                                callbacks[name] = callback; \
+                            } \
+                            removeEventListener: function(name, callback) { \
+                                delete callbacks[name]; \
+                            } \
+                        }";
+    
+    return [[WKUserScript alloc] initWithSource:source injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+}
+
 + (WKUserScript *)userScriptDisableZoom
 {
     NSString *source = @"var meta = document.createElement('meta'); \
@@ -316,6 +390,18 @@
         // Skip messages that are not posted from our Ti namespace
         // This is necessary to not post events when our App -> WebView hack posts messages
         return;
+    }
+    
+    BOOL isEvent = [[message body] isKindOfClass:[NSDictionary class]] && [[message body] objectForKey:@"name"] && [[message body] objectForKey:@"payload"];
+    
+    if (isEvent) {
+        NSString *name = [[message body] objectForKey:@"name"];
+        NSDictionary *payload = [[message body] objectForKey:@"payload"];
+        
+        if ([[TiCallbackManager sharedInstance] hasCallbackForName:name]) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKEventCallback object:nil userInfo:@{@"name": name, @"payload": payload}];
+            return;
+        }
     }
     
     if ([[self proxy] _hasListeners:@"message"]) {

@@ -20,6 +20,8 @@
     BOOL willHandleTouches;
 }
 
+- (void)registerNotificationCenter;
+
 - (WKWebView *) webView;
 
 @end

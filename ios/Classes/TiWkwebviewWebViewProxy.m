@@ -12,6 +12,15 @@
 
 @implementation TiWkwebviewWebViewProxy
 
+- (id)_initWithPageContext:(id<TiEvaluator>)context
+{
+    if (self = [super _initWithPageContext:context]) {
+        [[self webView] registerNotificationCenter];
+    }
+    
+    return self;
+}
+
 - (TiWkwebviewWebView *)webView
 {
     return (TiWkwebviewWebView *)self.view;

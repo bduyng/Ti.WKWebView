@@ -82,8 +82,11 @@ Features
 | isLoading | - | Boolean |
 | evalJS | Code (String), Callback (Function) | Void |
 | evalJSSync | Code (String) | String |
-| startListeningToProperties | Properties (Array<String>) | Void |
-| stopListeningToProperties | Properties (Array<String>) | Void |
+| startListeningToProperties | Array<String> | Void |
+| stopListeningToProperties | Array<String> | Void |
+| fireEvent | Name (String), Payload (Object) | Void |
+| addEventListener | Name (String), Callback (Function) | Void |
+| removeEventListener | Name (String), Callback (Function) | Void |
 
 #### Events
 
@@ -136,11 +139,48 @@ webView.evalJS('myJSMethod();');
 ```
 Check out the example file for sending and receiving message back and forth.
 
-> **Note**: Since 2.3.0, this module also supports synchronous communication via `evalJSSync`.
-> Instead of `evalJS`, it takes only one parameter (the code to evaluate) and no callback. Instead,
-> it returns the JavaScript evaluation result directly. While we understand there might be use-cases for
-> this functionality, we highly recommend to use asynchronous communication instead, since synchronous method
-> calls with block the user interface and may cause in an app-termination for long-running evaluations.
+**Note 1**: Since 2.3.0, this module also supports synchronous communication via `evalJSSync`.
+Instead of `evalJS`, it takes only one parameter (the code to evaluate) and no callback. Instead,
+it returns the JavaScript evaluation result directly. While we understand there might be use-cases for
+this functionality, we highly recommend to use asynchronous communication instead, since synchronous method
+calls with block the user interface and may cause in an app-termination for long-running evaluations.
+
+**Note 2**: Since 2.4.0, this modules also supports Ti.App-like events that allows the developer to fire events
+and add event-listeners to ease the communication between the app and the web-view. These are:
+  * fireEvent
+  * addEventListener
+  * removeEventListener
+Different to the Ti.App events, these ones are fired on the top-level module instance. See this example for details:
+```js
+var WK = require('ti.wkwebview');
+
+// Fire event
+WK.fireEvent('myEvent', { message: 'Titanium rocks!' });
+
+// Listen to events
+WK.addEventListener('myEvent', function(e) { ... });
+```
+The above events can be used on the JS-side as well. Here is an example on how to use them in your HTML file (ensure that there is no concurring WK variable):
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Local HTML</title>
+    </head>
+    <body>
+        <p>Hello world!</p>
+        <script type=\"text/javascript\">
+            // Listen to the native Titanium event
+            WK.addEventListener('testEvent', function(e) {
+                // Fire back an event to the native Titanium app
+                WK.fireEvent('testEventBack', {
+                    message: 'It worked!'
+                });
+            });
+        </script>
+    </body>
+</html>
+```
 
 #### Inter-App Communication
 For using the URL schemes `mailto`, `tel`, `sms` and `itms-services` you only have to set the `allowedURLSchemes` property. Other URL schemes (i.e. `fb`) additionally need the corresponding `LSApplicationQueriesSchemes` key in the iOS plist dictionary of your `tiapp.xml`:
