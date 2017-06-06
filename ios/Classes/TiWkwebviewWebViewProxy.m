@@ -259,6 +259,29 @@
     return resultString;
 }
 
+#if __IPHONE_11_0
+- (void)takeSnapshot:(id)args
+{
+    if (!@available(iOS 11.0, *)) {
+        NSLog(@"[ERROR] The \"takeSnapshot\" method is only available on iOS 11 and later.");
+        return;
+    }
+        
+    KrollCallback *callback = (KrollCallback *)[args objectAtIndex:0];
+    ENSURE_TYPE(callback, KrollCallback);
+    
+    [[[self webView] webView] takeSnapshotWithConfiguration:nil
+                                          completionHandler:^(UIImage *snapshotImage, NSError *error) {
+                                              if (error != nil) {
+                                                  [callback call:@[@{@"success": NUMBOOL(NO), @"error": error.localizedDescription}] thisObject:self];
+                                                  return;
+                                              }
+                                              
+                                              [callback call:@[@{@"success": NUMBOOL(YES),@"snapshot": [[TiBlob alloc] initWithImage:snapshotImage]}] thisObject:self];
+                                          }];
+}
+#endif
+
 #pragma mark Utilities
 
 + (NSDictionary *)dictionaryFromBackForwardItem:(WKBackForwardListItem *)item

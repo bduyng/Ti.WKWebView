@@ -87,6 +87,9 @@ Features
 | fireEvent | Name (String), Payload (Object) | Void |
 | addEventListener | Name (String), Callback (Function) | Void |
 | removeEventListener | Name (String), Callback (Function) | Void |
+| takeSnapshot * | Callback (Function) | Void |
+
+* Available on iOS 11.0+
 
 #### Events
 
