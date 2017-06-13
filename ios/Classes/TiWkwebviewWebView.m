@@ -269,7 +269,7 @@ extern NSString * const kTiWKEventCallback;
                             }, \
                             addEventListener: function(name, callback) { \
                                 callbacks[name] = callback; \
-                            } \
+                            }, \
                             removeEventListener: function(name, callback) { \
                                 delete callbacks[name]; \
                             } \
