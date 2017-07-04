@@ -31,9 +31,9 @@ extern NSString * const kTiWKEventCallback;
         WKWebViewConfiguration *config = configProxy ? [configProxy configuration] : [[WKWebViewConfiguration alloc] init];
         WKUserContentController *controller = [[WKUserContentController alloc] init];
         
-        [self setDisableZoom_:[self.proxy valueForKey:@"disableZoom"]];
-        [self setScalePageToFit_:[self.proxy valueForKey:@"scalePageToFit"]];
-        [self setDisableContextMenu_:[self.proxy valueForKey:@"disableContextMenu"]];
+        [self setDisableZoom_:[[self proxy] valueForKey:@"disableZoom"]];
+        [self setScalePageToFit_:[[self proxy] valueForKey:@"scalePageToFit"]];
+        [self setDisableContextMenu_:[[self proxy] valueForKey:@"disableContextMenu"]];
         
         [controller addUserScript:[TiWkwebviewWebView userScriptTitaniumInjection]];
     
@@ -237,30 +237,33 @@ extern NSString * const kTiWKEventCallback;
 
 -(void)setDisableZoom_:(id)value
 {
+    ENSURE_TYPE(value, NSNumber);
+
     BOOL disableZoom = [TiUtils boolValue:value];
+    
     if (disableZoom) {
         WKUserContentController *controller = [[[self webView] configuration] userContentController];
         [controller addUserScript:[TiWkwebviewWebView userScriptDisableZoom]];
     }
-    
-    
 }
 
 -(void)setScalePageToFit_:(id)value
 {
+    ENSURE_TYPE(value, NSNumber);
+    
     BOOL scalePageToFit = [TiUtils boolValue:value];
-    BOOL disableZoom = [TiUtils boolValue:[self.proxy valueForKey: @"disableZoom"]];
+    BOOL disableZoom = [TiUtils boolValue:[[self proxy] valueForKey: @"disableZoom"]];
     
     if (scalePageToFit && !disableZoom) {
         WKUserContentController *controller = [[[self webView] configuration] userContentController];
         [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
     }
-    
-    
 }
 
 -(void)setDisableContextMenu_:(id)value
 {
+    ENSURE_TYPE(value, NSNumber);
+
     BOOL disableContextMenu = [TiUtils boolValue:value];
     
     if (disableContextMenu == YES) {
