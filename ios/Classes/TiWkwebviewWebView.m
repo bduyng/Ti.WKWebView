@@ -30,11 +30,7 @@ extern NSString * const kTiWKEventCallback;
         TiWkwebviewConfigurationProxy *configProxy = [[self proxy] valueForKey:@"configuration"];
         WKWebViewConfiguration *config = configProxy ? [configProxy configuration] : [[WKWebViewConfiguration alloc] init];
         WKUserContentController *controller = [[WKUserContentController alloc] init];
-        
-        [self setDisableZoom_:[[self proxy] valueForKey:@"disableZoom"]];
-        [self setScalePageToFit_:[[self proxy] valueForKey:@"scalePageToFit"]];
-        [self setDisableContextMenu_:[[self proxy] valueForKey:@"disableContextMenu"]];
-        
+                
         [controller addUserScript:[TiWkwebviewWebView userScriptTitaniumInjection]];
     
         [controller addScriptMessageHandler:self name:@"Ti"];
