@@ -128,7 +128,7 @@
     NUMBOOL([[[[self webView] webView] configuration] allowsAirPlayForMediaPlayback]);
 }
 
-- (id)allowsPictureInPictureMediaPlaybacke
+- (id)allowsPictureInPictureMediaPlayback
 {
     NUMBOOL([[[[self webView] webView] configuration] allowsPictureInPictureMediaPlayback]);
 }

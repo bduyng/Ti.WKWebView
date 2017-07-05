@@ -31,19 +31,12 @@ extern NSString * const kTiWKEventCallback;
         WKWebViewConfiguration *config = configProxy ? [configProxy configuration] : [[WKWebViewConfiguration alloc] init];
         WKUserContentController *controller = [[WKUserContentController alloc] init];
         
-        if ([TiUtils boolValue:[[self proxy] valueForKey:@"disableZoom"] def:NO]) {
-            [controller addUserScript:[TiWkwebviewWebView userScriptDisableZoom]];
-        }
-        else if ([TiUtils boolValue:[[self proxy] valueForKey:@"scalePageToFit"] def:YES]) {
-            [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
-        }
+        [self setDisableZoom_:[[self proxy] valueForKey:@"disableZoom"]];
+        [self setScalePageToFit_:[[self proxy] valueForKey:@"scalePageToFit"]];
+        [self setDisableContextMenu_:[[self proxy] valueForKey:@"disableContextMenu"]];
         
-        if ([TiUtils boolValue:[[self proxy] valueForKey:@"disableContextMenu"] def:NO]) {
-            [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
-        }
-
         [controller addUserScript:[TiWkwebviewWebView userScriptTitaniumInjection]];
-        
+    
         [controller addScriptMessageHandler:self name:@"Ti"];
         [config setUserContentController:controller];
         willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
@@ -241,6 +234,44 @@ extern NSString * const kTiWKEventCallback;
     [[self proxy] replaceValue:value forKey:@"userAgent" notification:NO];
     [[self webView] setCustomUserAgent:[TiUtils stringValue:value]];
 }
+
+-(void)setDisableZoom_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+
+    BOOL disableZoom = [TiUtils boolValue:value];
+    
+    if (disableZoom) {
+        WKUserContentController *controller = [[[self webView] configuration] userContentController];
+        [controller addUserScript:[TiWkwebviewWebView userScriptDisableZoom]];
+    }
+}
+
+-(void)setScalePageToFit_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+    
+    BOOL scalePageToFit = [TiUtils boolValue:value];
+    BOOL disableZoom = [TiUtils boolValue:[[self proxy] valueForKey: @"disableZoom"]];
+    
+    if (scalePageToFit && !disableZoom) {
+        WKUserContentController *controller = [[[self webView] configuration] userContentController];
+        [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
+    }
+}
+
+-(void)setDisableContextMenu_:(id)value
+{
+    ENSURE_TYPE(value, NSNumber);
+
+    BOOL disableContextMenu = [TiUtils boolValue:value];
+    
+    if (disableContextMenu == YES) {
+        WKUserContentController *controller = [[[self webView] configuration] userContentController];
+        [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
+    }
+}
+
 
 #pragma mark Utilities
 
