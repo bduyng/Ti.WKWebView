@@ -267,7 +267,7 @@ var secondWebView = WK.createWebView({
 #### Custom event "handleurlscheme"
 - the custom url scheme has to be registered in the properties allowedURLSchemes array.
 - Passes the e.url for a custom url scheme
-- Introduced custom event because iOS10+ causes issues for some customurlschemes and forwarding the url via a titanium event to handle via the Titanium app is simpler short term solution than implementing "WKURLSchemeHandler" which is iOS11+ only.
+- Introduced "handleurlscheme" custom event because iOS10+ causes issues for some customurlschemes and forwarding the url via a titanium event to handle via the Titanium app is a simpler short term solution than implementing "WKURLSchemeHandler" which is iOS11+ only.
 
 ```js
 // Add an event listener to listen for handleurlscheme
