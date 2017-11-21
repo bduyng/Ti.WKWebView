@@ -570,6 +570,11 @@ extern NSString * const kTiWKEventCallback;
 {
     if ([[[self proxy] valueForKey:@"allowedURLSchemes"] containsObject:navigationAction.request.URL.scheme]) {
         if ([[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL]) {
+            // custom fireevent "handleurlscheme" to give url to Titanium app to handle implementation
+            if ([[self proxy] _hasListeners:@"handleurlscheme"]) {
+                [[self proxy] fireEvent:@"handleurlscheme" withObject:@{@"url": [TiUtils stringValue:navigationAction.request.URL]}];
+            }
+
             [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
