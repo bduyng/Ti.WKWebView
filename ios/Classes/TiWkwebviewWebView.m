@@ -575,14 +575,15 @@ extern NSString * const kTiWKEventCallback;
                     @"url": [TiUtils stringValue:[[navigationAction request] URL]],
                     @"handler": [[TiWkwebviewDecisionHandlerProxy alloc] _initWithPageContext:[[self proxy] pageContext] andDecisionHandler:decisionHandler]
                 }];
+                return;
             } else {
-              // DEPRECATED: Should use the "handleurl" event instead and call openURL on Ti.Platform.openURL instead
-              DebugLog(@"[WARN] Please use the \"handleurl\" event together with \"allowedURLSchemes\" in Ti.WKWebView 2.5.0 and later.");
-              DebugLog(@"[WARN] It returns both the \"url\" and \"handler\" property to open a URL and invoke the decision-handler.");
+                // DEPRECATED: Should use the "handleurl" event instead and call openURL on Ti.Platform.openURL instead
+                DebugLog(@"[WARN] Please use the \"handleurl\" event together with \"allowedURLSchemes\" in Ti.WKWebView 2.5.0 and later.");
+                DebugLog(@"[WARN] It returns both the \"url\" and \"handler\" property to open a URL and invoke the decision-handler.");
 
-              [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
-              decisionHandler(WKNavigationActionPolicyCancel);
-              return;
+                [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
             }
         }
     }
