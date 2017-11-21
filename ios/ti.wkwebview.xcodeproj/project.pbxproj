@@ -36,6 +36,8 @@
 		DB59D5191E0ED6BF009A0C43 /* TiWkwebviewWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */; };
 		DB59D51A1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */; };
 		DB59D51B1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB59D5171E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m */; };
+		DBD1B4741FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DBD1B4721FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.h */; };
+		DBD1B4751FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DBD1B4731FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.m */; };
 		DBDA36B71EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DBDA36B51EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.h */; };
 		DBDA36B81EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DBDA36B61EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.m */; };
 /* End PBXBuildFile section */
@@ -67,6 +69,8 @@
 		DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewWebView.m; path = Classes/TiWkwebviewWebView.m; sourceTree = "<group>"; };
 		DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewWebViewProxy.h; path = Classes/TiWkwebviewWebViewProxy.h; sourceTree = "<group>"; };
 		DB59D5171E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewWebViewProxy.m; path = Classes/TiWkwebviewWebViewProxy.m; sourceTree = "<group>"; };
+		DBD1B4721FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewDecisionHandlerProxy.h; path = Classes/TiWkwebviewDecisionHandlerProxy.h; sourceTree = "<group>"; };
+		DBD1B4731FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewDecisionHandlerProxy.m; path = Classes/TiWkwebviewDecisionHandlerProxy.m; sourceTree = "<group>"; };
 		DBDA36B51EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewConfigurationProxy.h; path = Classes/TiWkwebviewConfigurationProxy.h; sourceTree = "<group>"; };
 		DBDA36B61EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewConfigurationProxy.m; path = Classes/TiWkwebviewConfigurationProxy.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -113,20 +117,12 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */,
-				DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */,
-				DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */,
-				DB59D5171E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m */,
-				24DE9E0F11C5FE74003F90F6 /* TiWkwebviewModuleAssets.h */,
-				24DE9E1011C5FE74003F90F6 /* TiWkwebviewModuleAssets.m */,
-				24DD6CF71134B3F500162E58 /* TiWkwebviewModule.h */,
-				24DD6CF81134B3F500162E58 /* TiWkwebviewModule.m */,
-				DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */,
-				DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */,
-				DBDA36B51EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.h */,
-				DBDA36B61EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.m */,
-				DB56BC5D1EC888E8004FA09B /* TiCallbackManager.h */,
-				DB56BC5E1EC888E8004FA09B /* TiCallbackManager.m */,
+				DBD1B4711FC426410044BB42 /* Decision Handler */,
+				DBD1B46F1FC426160044BB42 /* Configuration */,
+				DBD1B46D1FC4260B0044BB42 /* Module */,
+				DBD1B46E1FC4260F0044BB42 /* Process Pool */,
+				DBD1B4701FC426240044BB42 /* Utilities */,
+				DBD1B46C1FC426040044BB42 /* Web View */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -138,6 +134,64 @@
 				24DD6D1B1134B66800162E58 /* titanium.xcconfig */,
 			);
 			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		DBD1B46C1FC426040044BB42 /* Web View */ = {
+			isa = PBXGroup;
+			children = (
+				DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */,
+				DB59D5151E0ED6BF009A0C43 /* TiWkwebviewWebView.m */,
+				DB59D5161E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h */,
+				DB59D5171E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m */,
+			);
+			name = "Web View";
+			sourceTree = "<group>";
+		};
+		DBD1B46D1FC4260B0044BB42 /* Module */ = {
+			isa = PBXGroup;
+			children = (
+				24DE9E0F11C5FE74003F90F6 /* TiWkwebviewModuleAssets.h */,
+				24DE9E1011C5FE74003F90F6 /* TiWkwebviewModuleAssets.m */,
+				24DD6CF71134B3F500162E58 /* TiWkwebviewModule.h */,
+				24DD6CF81134B3F500162E58 /* TiWkwebviewModule.m */,
+			);
+			name = Module;
+			sourceTree = "<group>";
+		};
+		DBD1B46E1FC4260F0044BB42 /* Process Pool */ = {
+			isa = PBXGroup;
+			children = (
+				DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */,
+				DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */,
+			);
+			name = "Process Pool";
+			sourceTree = "<group>";
+		};
+		DBD1B46F1FC426160044BB42 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				DBDA36B51EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.h */,
+				DBDA36B61EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.m */,
+			);
+			name = Configuration;
+			sourceTree = "<group>";
+		};
+		DBD1B4701FC426240044BB42 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				DB56BC5D1EC888E8004FA09B /* TiCallbackManager.h */,
+				DB56BC5E1EC888E8004FA09B /* TiCallbackManager.m */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+		DBD1B4711FC426410044BB42 /* Decision Handler */ = {
+			isa = PBXGroup;
+			children = (
+				DBD1B4721FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.h */,
+				DBD1B4731FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.m */,
+			);
+			name = "Decision Handler";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -155,6 +209,7 @@
 				DB59D5181E0ED6BF009A0C43 /* TiWkwebviewWebView.h in Headers */,
 				DB56BC5F1EC888E8004FA09B /* TiCallbackManager.h in Headers */,
 				DB59D51A1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.h in Headers */,
+				DBD1B4741FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +289,7 @@
 				DB59D5191E0ED6BF009A0C43 /* TiWkwebviewWebView.m in Sources */,
 				DB06B2491E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m in Sources */,
 				DBDA36B81EA4CD7B0023E9F3 /* TiWkwebviewConfigurationProxy.m in Sources */,
+				DBD1B4751FC4265F0044BB42 /* TiWkwebviewDecisionHandlerProxy.m in Sources */,
 				DB59D51B1E0ED6BF009A0C43 /* TiWkwebviewWebViewProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -254,6 +310,7 @@
 			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DSTROOT = /tmp/TiWkwebview.dst;
@@ -295,6 +352,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = NO;
 				DSTROOT = /tmp/TiWkwebview.dst;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_MODEL_TUNING = G5;
