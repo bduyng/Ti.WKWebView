@@ -570,6 +570,13 @@ extern NSString * const kTiWKEventCallback;
 {
     if ([[[self proxy] valueForKey:@"allowedURLSchemes"] containsObject:navigationAction.request.URL.scheme]) {
         if ([[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL]) {
+            // Event to return url to Titanium in order to handle OAuth and more
+            if ([[self proxy] _hasListeners:@"handleurl"]) {
+                [[self proxy] fireEvent:@"handleurl" withObject:@{
+                    @"url": [TiUtils stringValue:[[navigationAction request] URL]]
+                }];
+            }
+
             [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
             decisionHandler(WKNavigationActionPolicyCancel);
             return;

@@ -1,18 +1,15 @@
 # Ti.WKWebView 
 [![Build Status](https://travis-ci.org/appcelerator-modules/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/appcelerator-modules/Ti.WKWebView) [![License](http://hans-knoechel.de/shields/shield-license.svg?v=2)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg?v=3)](http://tislack.org)
 
-Summary
----------------
+## Summary
 Ti.WKWebView is an open source project to support the `WKWebView` API with Titanium.
 
-Requirements
----------------
-- Titanium Mobile SDK 5.0.0.GA or later
-- iOS 9 or later
-- Xcode 7.0 or later
+## Requirements
+- Titanium SDK 5.0.0.GA or later
+- iOS 9+
+- Xcode 7+
 
-Download + Setup
----------------
+## Download + Setup
 
 ### Download
 * [Stable release](https://github.com/appcelerator-modules/ti.wkwebview/releases)
@@ -30,8 +27,8 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 </modules>
 ```
 
-Features
----------------
+## Features
+
 ### API's
 
 | Name | Example|
@@ -101,6 +98,7 @@ Features
 | load | url, title |
 | redirect | url, title |
 | error | url, title, error |
+| handleurl | url |
 
 #### Constants
 
@@ -263,14 +261,24 @@ var secondWebView = WK.createWebView({
 });
 ```
 
-Author
----------------
-Hans Knoechel ([@hansemannnn](https://twitter.com/hansemannnn) / [Web](http://hans-knoechel.de)) for Appcelerator
+### Custom event "handleurl"
+- The custom url-scheme has to be registered in the `allowedURLSchemes` array-property
+- Passes the `url` for a custom url-scheme
+- The event is introduced because iOS 10+ causes issues for some custom url-schemes and forwarding the url 
+  in an event is a simpler short term solution than implementing the `WKURLSchemeHandler` which is iOS 11+ only.
 
-License
----------------
+```js
+// Add an event listener to listen for a custom URL-scheme
+webView.addEventListener('handleurl', function(e) {
+    // Check for e.url
+});
+```
+
+## Author
+Hans Knoechel ([@hansemannnn](https://twitter.com/hansemannnn) / [Web](http://hans-knoechel.de)) for Axway Appcelerator
+
+## License
 Apache 2.0
 
-Contributing
----------------
+## Contributing
 Code contributions are greatly appreciated, please submit a new [pull request](https://github.com/appcelerator-modules/ti.wkwebview/pull/new/master)!
