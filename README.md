@@ -274,6 +274,7 @@ var secondWebView = WK.createWebView({
 webView.addEventListener('handleurlscheme', function(e) {
     // Check for e.url
 });
+```
 
 Author
 ---------------
