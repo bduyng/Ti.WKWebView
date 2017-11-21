@@ -118,6 +118,8 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | CACHE_POLICY_RETURN_CACHE_DATA_DONT_LOAD | cachePolicy |
 | SELECTION_GRANULARITY_AUTOMATIC | selectionGranularity |
 | SELECTION_GRANULARITY_CHARACTER | selectionGranularity |
+| ACTION_POLICY_CANCEL | handleurl (Event) |
+| ACTION_POLICY_ALLOW | handleurl (Event) |
 
 #### WebView <-> App Communication
 You can send data from the Web View to your native app by posting messages like this:
@@ -261,7 +263,8 @@ var secondWebView = WK.createWebView({
 });
 ```
 
-### Custom event "handleurl"
+### Handle custom URL-schemes
+
 - The custom url-scheme has to be registered in the `allowedURLSchemes` array-property
 - Passes the `url` for a custom url-scheme
 - The event is introduced because iOS 10+ causes issues for some custom url-schemes and forwarding the url 
@@ -270,7 +273,10 @@ var secondWebView = WK.createWebView({
 ```js
 // Add an event listener to listen for a custom URL-scheme
 webView.addEventListener('handleurl', function(e) {
-    // Check for e.url
+  var handler = e.handler;
+
+  Ti.Platform.openURL(e.url);
+  handler.invoke(WK.ACTION_POLICY_CANCEL); // ACTION_POLICY_CANCEL or ACTION_POLICY_ALLOW
 });
 ```
 

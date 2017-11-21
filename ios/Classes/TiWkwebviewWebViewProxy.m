@@ -262,8 +262,8 @@
 #if __IPHONE_11_0
 - (void)takeSnapshot:(id)args
 {
-    if (!@available(iOS 11.0, *)) {
-        NSLog(@"[ERROR] The \"takeSnapshot\" method is only available on iOS 11 and later.");
+    if ([TiUtils isIOSVersionOrGreater:@"11.0"]) {
+        DebugLog(@"[ERROR] The \"takeSnapshot\" method is only available on iOS 11 and later.");
         return;
     }
         

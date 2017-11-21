@@ -1,20 +1,19 @@
 /**
  * Appcelerator Titanium Mobile
- * Copyright (c) 2009-2016 by Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2009-present by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
 
+#import "TiWkwebviewModule.h"
 #import "TiWkwebviewWebView.h"
 #import "TiWkwebviewWebViewProxy.h"
 #import "TiWkwebviewConfigurationProxy.h"
+#import "TiWkwebviewDecisionHandlerProxy.h"
 
 #import "TiFilesystemFileProxy.h"
 #import "TiApp.h"
 #import "TiCallbackManager.h"
-
-#import "SBJSON.h"
-#import "TiWkwebviewModule.h"
 
 extern NSString * const kTiWKFireEvent;
 extern NSString * const kTiWKAddEventListener;
@@ -573,20 +572,26 @@ extern NSString * const kTiWKEventCallback;
             // Event to return url to Titanium in order to handle OAuth and more
             if ([[self proxy] _hasListeners:@"handleurl"]) {
                 [[self proxy] fireEvent:@"handleurl" withObject:@{
-                    @"url": [TiUtils stringValue:[[navigationAction request] URL]]
+                    @"url": [TiUtils stringValue:[[navigationAction request] URL]],
+                    @"handler": [[TiWkwebviewDecisionHandlerProxy alloc] _initWithPageContext:[[self proxy] pageContext] andDecisionHandler:decisionHandler]
                 }];
-            }
+                return;
+            } else {
+                // DEPRECATED: Should use the "handleurl" event instead and call openURL on Ti.Platform.openURL instead
+                DebugLog(@"[WARN] Please use the \"handleurl\" event together with \"allowedURLSchemes\" in Ti.WKWebView 2.5.0 and later.");
+                DebugLog(@"[WARN] It returns both the \"url\" and \"handler\" property to open a URL and invoke the decision-handler.");
 
-            [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
+                [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
+            }
         }
     }
     
     decisionHandler(WKNavigationActionPolicyAllow);
 }
 
-static NSString * UIKitLocalizedString(NSString *string)
+static NSString *UIKitLocalizedString(NSString *string)
 {
     NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
     return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
