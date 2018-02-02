@@ -70,7 +70,6 @@ NSString * const kTiWKEventCallback = @"kTiWKEventCallback";
 - (void)removeEventListener:(NSArray *)args
 {
     NSString *name = [args objectAtIndex:0];
-    KrollCallback *callback = [args objectAtIndex:1];
     
     [[TiCallbackManager sharedInstance] removeCallbackWithName:name];
 }
@@ -107,5 +106,8 @@ MAKE_SYSTEM_PROP(SELECTION_GRANULARITY_CHARACTER, WKSelectionGranularityCharacte
 
 MAKE_SYSTEM_PROP(ACTION_POLICY_CANCEL, WKNavigationActionPolicyCancel);
 MAKE_SYSTEM_PROP(ACTION_POLICY_ALLOW, WKNavigationActionPolicyAllow);
+
+MAKE_SYSTEM_PROP(INJECTION_TIME_DOCUMENT_START, WKUserScriptInjectionTimeAtDocumentStart);
+MAKE_SYSTEM_PROP(INJECTION_TIME_DOCUMENT_END, WKUserScriptInjectionTimeAtDocumentEnd);
 
 @end
