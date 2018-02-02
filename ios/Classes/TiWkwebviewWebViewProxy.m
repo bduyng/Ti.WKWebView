@@ -173,19 +173,17 @@
 - (void)addScriptMessageHandler:(id)value
 {
     ENSURE_SINGLE_ARG(value, NSString);
-    NSString *name = [TiUtils stringValue:@"name"];
   
     WKUserContentController *controller = [[[[self webView] webView] configuration] userContentController];
-    [controller addScriptMessageHandler:[self webView] name:name];
+    [controller addScriptMessageHandler:[self webView] name:value];
 }
 
 - (void)removeScriptMessageHandler:(id)value
 {
     ENSURE_SINGLE_ARG(value, NSString);
-    NSString *name = [TiUtils stringValue:@"name"];
   
     WKUserContentController *controller = [[[[self webView] webView] configuration] userContentController];
-    [controller removeScriptMessageHandlerForName:name];
+    [controller removeScriptMessageHandlerForName:value];
 }
 
 - (NSNumber *)isLoading:(id)unused

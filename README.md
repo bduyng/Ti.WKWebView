@@ -1,11 +1,11 @@
 # Ti.WKWebView 
-[![Build Status](https://travis-ci.org/appcelerator-modules/Ti.WKWebView.svg?branch=master)](https://travis-ci.org/appcelerator-modules/Ti.WKWebView) [![License](http://hans-knoechel.de/shields/shield-license.svg?v=2)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg?v=3)](http://tislack.org)
+[![License](http://hans-knoechel.de/shields/shield-license.svg?v=2)](./LICENSE)  [![Support](http://hans-knoechel.de/shields/shield-slack.svg?v=3)](http://tislack.org)
 
 ## Summary
 Ti.WKWebView is an open source project to support the `WKWebView` API with Titanium.
 
 ## Requirements
-- Titanium SDK 5.0.0.GA or later
+- Titanium SDK 5.0.0 or later
 - iOS 9+
 - Xcode 7+
 
@@ -20,10 +20,10 @@ Unpack the module and place it inside the `modules/iphone` folder of your projec
 Edit the iOS and modules section of your `tiapp.xml` file to include this module:
 ```xml
 <ios>
-    <min-ios-ver>9.0</min-ios-ver>
+  <min-ios-ver>9.0</min-ios-ver>
 </ios>
 <modules>
-    <module>ti.wkwebview</module>
+  <module>ti.wkwebview</module>
 </modules>
 ```
 
@@ -85,6 +85,10 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | addEventListener | Name (String), Callback (Function) | Void |
 | removeEventListener | Name (String), Callback (Function) | Void |
 | takeSnapshot * | Callback (Function) | Void |
+| addUserScript | Object: source (String), injectionTime (INJECTION_TIME_*), mainFrameOnly (Boolean | Void |
+| removeAllUserScripts | - | Void |
+| addScriptMessageHandler | Name (String) | Void |
+| removeScriptMessageHandler | Name (String) | Void |
 
 * Available on iOS 11.0+
 
@@ -120,6 +124,8 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | SELECTION_GRANULARITY_CHARACTER | selectionGranularity |
 | ACTION_POLICY_CANCEL | handleurl (Event) |
 | ACTION_POLICY_ALLOW | handleurl (Event) |
+| INJECTION_TIME_DOCUMENT_START | addUserScript.injectionTime |
+| INJECTION_TIME_DOCUMENT_END | addUserScript.injectionTime |
 
 #### WebView <-> App Communication
 You can send data from the Web View to your native app by posting messages like this:
