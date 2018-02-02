@@ -143,7 +143,7 @@ extern NSString * const kTiWKEventCallback;
         
     // Handle local URL's (WiP)
     } else {
-        NSString *path = [self pathFromComponents:@[[TiUtils stringValue:value]]];
+        NSString *path = [[TiUtils toURL:value proxy:self.proxy] absoluteString];
         [[self webView] loadFileURL:[NSURL fileURLWithPath:path]
             allowingReadAccessToURL:[NSURL fileURLWithPath:[path stringByDeletingLastPathComponent]]];
     }
@@ -412,12 +412,6 @@ extern NSString * const kTiWKEventCallback;
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
-    if (![message.name isEqualToString:@"Ti"]) {
-        // Skip messages that are not posted from our Ti namespace
-        // This is necessary to not post events when our App -> WebView hack posts messages
-        return;
-    }
-    
     BOOL isEvent = [[message body] isKindOfClass:[NSDictionary class]] && [[message body] objectForKey:@"name"] && [[message body] objectForKey:@"payload"];
     
     if (isEvent) {
@@ -432,11 +426,11 @@ extern NSString * const kTiWKEventCallback;
     
     if ([[self proxy] _hasListeners:@"message"]) {
         [[self proxy] fireEvent:@"message" withObject:@{
-                                                @"url": message.frameInfo.request.URL.absoluteString ?: [[NSBundle mainBundle] bundlePath],
-                                                @"body": message.body,
-                                                @"name": message.name,
-                                                @"isMainFrame": NUMBOOL(message.frameInfo.isMainFrame)
-                                                }];
+            @"url": message.frameInfo.request.URL.absoluteString ?: [[NSBundle mainBundle] bundlePath],
+            @"body": message.body,
+            @"name": message.name,
+            @"isMainFrame": NUMBOOL(message.frameInfo.isMainFrame),
+        }];
     }
 }
 
@@ -511,7 +505,7 @@ extern NSString * const kTiWKEventCallback;
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil
                                                                              message:message
                                                                       preferredStyle:UIAlertControllerStyleAlert];
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: NSLocalizedString(@"OK", nil))
                                                         style:UIAlertActionStyleCancel
                                                       handler:^(UIAlertAction *action) {
                                                           completionHandler();
@@ -526,13 +520,13 @@ extern NSString * const kTiWKEventCallback;
                                                                              message:message
                                                                       preferredStyle:UIAlertControllerStyleAlert];
     
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: NSLocalizedString(@"OK", nil))
                                                         style:UIAlertActionStyleDefault
                                                       handler:^(UIAlertAction *action) {
                                                           completionHandler(YES);
                                                       }]];
     
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: NSLocalizedString(@"Cancel", nil))
                                                         style:UIAlertActionStyleCancel
                                                       handler:^(UIAlertAction *action) {
                                                           completionHandler(NO);
@@ -550,13 +544,13 @@ extern NSString * const kTiWKEventCallback;
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         textField.text = defaultText;
     }];
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: @"OK")
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"ok"]] ?: NSLocalizedString(@"OK", nil))
                                                         style:UIAlertActionStyleDefault
                                                       handler:^(UIAlertAction *action) {
                                                           completionHandler(alertController.textFields.firstObject.text ?: defaultText);
                                                       }]];
     
-    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: @"Cancel")
+    [alertController addAction:[UIAlertAction actionWithTitle:UIKitLocalizedString([TiUtils stringValue:[[self proxy] valueForKey:@"cancel"]] ?: NSLocalizedString(@"Cancel", nil))
                                                         style:UIAlertActionStyleCancel
                                                       handler:^(UIAlertAction *action) {
                                                           completionHandler(nil);

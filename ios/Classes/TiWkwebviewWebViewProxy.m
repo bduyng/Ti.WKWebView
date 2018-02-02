@@ -78,17 +78,17 @@
     NSMutableArray *forwardList = [NSMutableArray arrayWithCapacity:list.forwardList.count];
     
     for (WKBackForwardListItem *item in list.backList) {
-        [backList addObject:[TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:item]];
+        [backList addObject:[TiWkwebviewWebViewProxy _dictionaryFromBackForwardItem:item]];
     }
     
     for (WKBackForwardListItem *item in list.forwardList) {
-        [forwardList addObject:[TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:item]];
+        [forwardList addObject:[TiWkwebviewWebViewProxy _dictionaryFromBackForwardItem:item]];
     }
     
     return @{
-        @"currentItem": [TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:[list currentItem]],
-        @"backItem": [TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:[list backItem]],
-        @"forwardItem": [TiWkwebviewWebViewProxy dictionaryFromBackForwardItem:[list forwardItem]],
+        @"currentItem": [TiWkwebviewWebViewProxy _dictionaryFromBackForwardItem:[list currentItem]],
+        @"backItem": [TiWkwebviewWebViewProxy _dictionaryFromBackForwardItem:[list backItem]],
+        @"forwardItem": [TiWkwebviewWebViewProxy _dictionaryFromBackForwardItem:[list forwardItem]],
         @"backList": backList,
         @"forwardList": forwardList
     };
@@ -151,7 +151,44 @@
 
 #pragma mark Methods
 
-- (id)isLoading:(id)unused
+- (void)addUserScript:(id)args
+{
+    ENSURE_SINGLE_ARG(args, NSDictionary);
+  
+    NSString *source = [TiUtils stringValue:@"source" properties:args];
+    WKUserScriptInjectionTime injectionTime = [TiUtils intValue:@"injectionTime" properties:args];
+    BOOL mainFrameOnly = [TiUtils boolValue:@"mainFrameOnly" properties:args];
+  
+    WKUserScript *script = [[WKUserScript alloc] initWithSource:source injectionTime:injectionTime forMainFrameOnly:mainFrameOnly];
+    WKUserContentController *controller = [[[[self webView] webView] configuration] userContentController];
+    [controller addUserScript:script];
+}
+
+- (void)removeAllUserScripts:(id)unused
+{
+    WKUserContentController *controller = [[[[self webView] webView] configuration] userContentController];
+    [controller removeAllUserScripts];
+}
+
+- (void)addScriptMessageHandler:(id)value
+{
+    ENSURE_SINGLE_ARG(value, NSString);
+    NSString *name = [TiUtils stringValue:@"name"];
+  
+    WKUserContentController *controller = [[[[self webView] webView] configuration] userContentController];
+    [controller addScriptMessageHandler:[self webView] name:name];
+}
+
+- (void)removeScriptMessageHandler:(id)value
+{
+    ENSURE_SINGLE_ARG(value, NSString);
+    NSString *name = [TiUtils stringValue:@"name"];
+  
+    WKUserContentController *controller = [[[[self webView] webView] configuration] userContentController];
+    [controller removeScriptMessageHandlerForName:name];
+}
+
+- (NSNumber *)isLoading:(id)unused
 {
     return NUMBOOL([[[self webView] webView] isLoading]);
 }
@@ -176,12 +213,12 @@
     [[[self webView] webView] goForward];
 }
 
-- (id)canGoBack:(id)unused
+- (NSNumber *)canGoBack:(id)unused
 {
     return NUMBOOL([[[self webView] webView] canGoBack]);
 }
 
-- (id)canGoForward:(id)unused
+- (NSNumber *)canGoForward:(id)unused
 {
     return NUMBOOL([[[self webView] webView] canGoForward]);
 }
@@ -284,7 +321,7 @@
 
 #pragma mark Utilities
 
-+ (NSDictionary *)dictionaryFromBackForwardItem:(WKBackForwardListItem *)item
++ (NSDictionary *)_dictionaryFromBackForwardItem:(WKBackForwardListItem *)item
 {
     return @{@"url": item.URL.absoluteString, @"initialUrl": item.initialURL.absoluteString, @"title": item.title};
 }

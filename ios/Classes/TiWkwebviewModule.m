@@ -70,7 +70,6 @@ NSString * const kTiWKEventCallback = @"kTiWKEventCallback";
 - (void)removeEventListener:(NSArray *)args
 {
     NSString *name = [args objectAtIndex:0];
-    KrollCallback *callback = [args objectAtIndex:1];
     
     [[TiCallbackManager sharedInstance] removeCallbackWithName:name];
 }
