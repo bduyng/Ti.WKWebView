@@ -191,6 +191,12 @@ The above events can be used on the JS-side as well. Here is an example on how t
 </html>
 ```
 
+#### Saving Images
+
+If you want to allow users to browse the internet (e.g. by using a remote site), ensure to include the
+`NSPhotoLibraryAddUsageDescription` key in your tiapp.xml. Different to the `UIWebView` and its `Ti.UI.WebView`
+implementation, the `WKWebView` is more configurable but require the developer to act more carefully. 
+
 #### Inter-App Communication
 For using the URL schemes `mailto`, `tel`, `sms` and `itms-services` you only have to set the `allowedURLSchemes` property. Other URL schemes (i.e. `fb`) additionally need the corresponding `LSApplicationQueriesSchemes` key in the iOS plist dictionary of your `tiapp.xml`:
 ```xml
