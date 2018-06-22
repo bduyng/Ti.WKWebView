@@ -20,6 +20,7 @@
     
     BOOL _willHandleTouches;
     NSArray<NSString *> *_blacklistedURLs;
+    NSURL *_currentURL;
 }
 
 // Used from the proxy

@@ -160,11 +160,8 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
     // Handle remote URL's
     if ([value hasPrefix:@"http"] || [value hasPrefix:@"https"]) {
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[TiUtils stringValue:value]]
-                                                 cachePolicy:[TiUtils intValue:[[self proxy] valueForKey:@"cachePolicy"] def:NSURLRequestUseProtocolCachePolicy]
-                                             timeoutInterval:[TiUtils doubleValue:[[self proxy] valueForKey:@"timeout"]  def:60]];
-        [[self webView] loadRequest:request];
-        
+        _currentURL = [NSURL URLWithString:[TiUtils stringValue:value]];
+        [self loadRequestWithURL:_currentURL];
     // Handle local URL's (WiP)
     } else {
         NSString *path = [[TiUtils toURL:value proxy:self.proxy] absoluteString];
@@ -319,6 +316,24 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 }
 
 #pragma mark Utilities
+
+- (void)loadRequestWithURL:(NSURL *)url
+{
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
+                                                           cachePolicy:[TiUtils intValue:[[self proxy] valueForKey:@"cachePolicy"] def:NSURLRequestUseProtocolCachePolicy]
+                                                       timeoutInterval:[TiUtils doubleValue:[[self proxy] valueForKey:@"timeout"] def:60]];
+    
+    // Set request headers
+    NSDictionary<NSString *, id> *requestHeaders = [[self proxy] valueForKey:@"requestHeaders"];
+    
+    if (requestHeaders != nil) {
+        for (NSString *key in requestHeaders) {
+            [request setValue:requestHeaders[key] forHTTPHeaderField:key];
+        }
+    }
+    
+    [[self webView] loadRequest:request];
+}
 
 + (WKUserScript *)userScriptScalePageToFit
 {
@@ -764,6 +779,23 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     } else {
         decisionHandler(WKNavigationActionPolicyAllow);
     }
+}
+
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler
+{
+    NSDictionary<NSString *, id> *requestHeaders = [[self proxy] valueForKey:@"requestHeaders"];
+    NSURL *requestedURL = navigationResponse.response.URL;
+
+    // If we have request headers set, we do a little hack to persist them across different URL's,
+    // which is not officially supportted by iOS.
+    if (requestHeaders != nil && requestedURL != nil && requestedURL != _currentURL) {
+        _currentURL = requestedURL;
+        decisionHandler(WKNavigationResponsePolicyCancel);
+        [self loadRequestWithURL:_currentURL];
+        return;
+    }
+
+    decisionHandler(WKNavigationResponsePolicyAllow);
 }
 
 #pragma mark Internal Utilities
