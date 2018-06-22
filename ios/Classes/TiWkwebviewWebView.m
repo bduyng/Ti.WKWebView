@@ -386,7 +386,7 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
                             window.webkit.messageHandlers.TiApp.postMessage({name:'fatal', method: 'log', callback: Ti._JSON({level:'fatal', message:message},1)},'*'); \
                         }, \
                         warn: function(message){ \
-                            window.webkit.messageHandlers.TiApp.postMessage({name:'warn', method: 'warn', callback: Ti._JSON({level:'debug', message:message},1)},'*'); \
+                            window.webkit.messageHandlers.TiApp.postMessage({name:'warn', method: 'log', callback: Ti._JSON({level:'warn', message:message},1)},'*'); \
                         }, \
     }; \
     ";
