@@ -371,7 +371,25 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
                                         var entry=listeners[c]; \
                                         if(entry.id==evtid){ \
                                             entry.callback.call(entry.callback,evt) \
-                            }}}}}";
+                        }}}}}; \
+                    Ti.API = { \
+                        debug: function(message) { \
+                            window.webkit.messageHandlers.TiApp.postMessage({name:'debug', method: 'log', callback: Ti._JSON({level:'debug', message:message},1)},'*'); \
+                        }, \
+                        error: function(message) { \
+                            window.webkit.messageHandlers.TiApp.postMessage({name:'error', method: 'log', callback: Ti._JSON({level:'error', message:message},1)},'*'); \
+                        }, \
+                        info: function(message){ \
+                            window.webkit.messageHandlers.TiApp.postMessage({name:'info', method: 'log', callback: Ti._JSON({level:'info', message:message},1)},'*'); \
+                        }, \
+                        fatal: function(message){ \
+                            window.webkit.messageHandlers.TiApp.postMessage({name:'fatal', method: 'log', callback: Ti._JSON({level:'fatal', message:message},1)},'*'); \
+                        }, \
+                        warn: function(message){ \
+                            window.webkit.messageHandlers.TiApp.postMessage({name:'warn', method: 'warn', callback: Ti._JSON({level:'debug', message:message},1)},'*'); \
+                        }, \
+    }; \
+    ";
 
     NSString *sourceString = [NSString stringWithFormat:source, _pageToken, baseInjectScript];
     return [[WKUserScript alloc] initWithSource:sourceString injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
@@ -501,18 +519,25 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
             NSError *error = nil;
             NSDictionary *event = [decoder fragmentWithString:callback error:&error];
             
+            NSString *method = [[message body] objectForKey:@"method"];
+            NSString *moduleName = [method isEqualToString:@"log"] ? @"API" : @"App";
+
             id<TiEvaluator> context = [[(TiWkwebviewWebViewProxy *)self.proxy host] contextForToken:_pageToken];
-            TiModule *tiModule = (TiModule *)[[(TiWkwebviewWebViewProxy *)self.proxy host] moduleNamed:@"App" context:context];
+            TiModule *tiModule = (TiModule *)[[(TiWkwebviewWebViewProxy *)self.proxy host] moduleNamed:moduleName context:context];
             [tiModule setExecutionContext:context];
             
             if ([[[message body] objectForKey:@"method"] isEqualToString:@"fireEvent"]) {
                 [tiModule fireEvent:name withObject:payload];
-            } else if ([[[message body] objectForKey:@"method"] isEqualToString:@"addEventListener"]) {
+            } else if ([method isEqualToString:@"addEventListener"]) {
                 id listenerid = [event objectForKey:@"id"];
                 [tiModule addEventListener:[NSArray arrayWithObjects:name, listenerid, nil]];
-            } else if ([[[message body] objectForKey:@"method"] isEqualToString:@"removeEventListener"]) {
+            } else if ([method isEqualToString:@"removeEventListener"]) {
                 id listenerid = [[message body] objectForKey:@"id"];
                 [tiModule removeEventListener:[NSArray arrayWithObjects:name, listenerid, nil]];
+            } else if ([method isEqualToString:@"log"]) {
+                NSString *level = [event objectForKey:@"level"];
+                NSString *message = [event objectForKey:@"message"];
+                [tiModule performSelector:@selector(log:) withObject:[NSArray arrayWithObjects:level, message, nil]];
             }
             return;
         }
