@@ -149,11 +149,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
     }
-    
-    if ([[self proxy] _hasListeners:@"beforeload"]) {
-        [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [TiUtils stringValue:value]}];
-    }
-    
+
     // Handle remote URL's
     if ([value hasPrefix:@"http"] || [value hasPrefix:@"https"]) {
         NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[TiUtils stringValue:value]]
@@ -705,6 +701,13 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler
 {
+    if ([[self proxy] _hasListeners:@"beforeload"]) {
+        [[self proxy] fireEvent:@"beforeload" withObject:@{
+            @"url": webView.URL.absoluteString,
+            @"navigationType": @(navigationAction.navigationType)
+        }];
+    }
+
     if ([[[self proxy] valueForKey:@"allowedURLSchemes"] containsObject:navigationAction.request.URL.scheme]) {
         if ([[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL]) {
             // Event to return url to Titanium in order to handle OAuth and more
