@@ -20,7 +20,7 @@ extern NSString * const kTiWKFireEvent;
 extern NSString * const kTiWKAddEventListener;
 extern NSString * const kTiWKEventCallback;
 
-NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;var c=0;var h;while(c<e){h=a.charCodeAt(c++).toString(16);r+='\\\\u';var l=4-h.length;while(l-->0){r+='0'};r+=h}return r};Ti._bridgeEnc=function(o){return'<'+Ti._hexish(o)+'>'};Ti._JSON=function(object,bridge){var type=typeof object;switch(type){case'undefined':case'function':case'unknown':return undefined;case'number':case'boolean':return object;case'string':if(bridge===1)return Ti._bridgeEnc(object);return'\"'+object.replace(/\"/g,'\\\\\"').replace(/\\n/g,'\\\\n').replace(/\\r/g,'\\\\r')+'\"'}if((object===null)||(object.nodeType==1))return'null';if(object.constructor.toString().indexOf('Date')!=-1){return'new Date('+object.getTime()+')'}if(object.constructor.toString().indexOf('Array')!=-1){var res='[';var pre='';var len=object.length;for(var i=0;i<len;i++){var value=object[i];if(value!==undefined)value=Ti._JSON(value,bridge);if(value!==undefined){res+=pre+value;pre=', '}}return res+']'}var objects=[];for(var prop in object){var value=object[prop];if(value!==undefined){value=Ti._JSON(value,bridge)}if(value!==undefined){objects.push(Ti._JSON(prop,bridge)+': '+value)}}return'{'+objects.join(',')+'}'};";
+static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;var c=0;var h;while(c<e){h=a.charCodeAt(c++).toString(16);r+='\\\\u';var l=4-h.length;while(l-->0){r+='0'};r+=h}return r};Ti._bridgeEnc=function(o){return'<'+Ti._hexish(o)+'>'};Ti._JSON=function(object,bridge){var type=typeof object;switch(type){case'undefined':case'function':case'unknown':return undefined;case'number':case'boolean':return object;case'string':if(bridge===1)return Ti._bridgeEnc(object);return'\"'+object.replace(/\"/g,'\\\\\"').replace(/\\n/g,'\\\\n').replace(/\\r/g,'\\\\r')+'\"'}if((object===null)||(object.nodeType==1))return'null';if(object.constructor.toString().indexOf('Date')!=-1){return'new Date('+object.getTime()+')'}if(object.constructor.toString().indexOf('Array')!=-1){var res='[';var pre='';var len=object.length;for(var i=0;i<len;i++){var value=object[i];if(value!==undefined)value=Ti._JSON(value,bridge);if(value!==undefined){res+=pre+value;pre=', '}}return res+']'}var objects=[];for(var prop in object){var value=object[prop];if(value!==undefined){value=Ti._JSON(value,bridge)}if(value!==undefined){objects.push(Ti._JSON(prop,bridge)+': '+value)}}return'{'+objects.join(',')+'}'};";
 
 @implementation TiWkwebviewWebView
 
@@ -126,7 +126,6 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
 
 - (void)fireEvent:(id)listener withObject:(id)obj remove:(BOOL)yn thisObject:(id)thisObject_
 {
-  // don't bother firing an app event to the webview if we don't have a webview yet created
   if (_webView != nil) {
     NSDictionary *event = (NSDictionary *)obj;
     NSString *name = [event objectForKey:@"type"];
@@ -513,7 +512,7 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
             [[NSNotificationCenter defaultCenter] postNotificationName:kTiWKEventCallback object:nil userInfo:@{@"name": name, @"payload": payload}];
             return;
         } else if ([message.name isEqualToString:@"TiApp"]) {
-            id callback = [[message body] objectForKey:@"callback"];
+            NSString *callback = [[message body] objectForKey:@"callback"];
             
             SBJSON *decoder = [[SBJSON alloc] init];
             NSError *error = nil;
@@ -526,7 +525,7 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
             TiModule *tiModule = (TiModule *)[[(TiWkwebviewWebViewProxy *)self.proxy host] moduleNamed:moduleName context:context];
             [tiModule setExecutionContext:context];
             
-            if ([[[message body] objectForKey:@"method"] isEqualToString:@"fireEvent"]) {
+            if ([method isEqualToString:@"fireEvent"]) {
                 [tiModule fireEvent:name withObject:payload];
             } else if ([method isEqualToString:@"addEventListener"]) {
                 id listenerid = [event objectForKey:@"id"];
@@ -537,7 +536,9 @@ NSString *baseInjectScript = @"Ti._hexish=function(a){var r='';var e=a.length;va
             } else if ([method isEqualToString:@"log"]) {
                 NSString *level = [event objectForKey:@"level"];
                 NSString *message = [event objectForKey:@"message"];
-                [tiModule performSelector:@selector(log:) withObject:[NSArray arrayWithObjects:level, message, nil]];
+                if ([tiModule respondsToSelector:@selector(log:)]) {
+                    [tiModule performSelector:@selector(log:) withObject:@[level, message]];
+                }
             }
             return;
         }
