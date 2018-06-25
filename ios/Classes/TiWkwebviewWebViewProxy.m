@@ -150,47 +150,47 @@
 
 #pragma mark Getters
 
-- (id)disableBounce
+- (NSNumber *)disableBounce
 {
-    return NUMBOOL(![[[[self webView] webView] scrollView] bounces]);
+    return @(![[[[self webView] webView] scrollView] bounces]);
 }
 
-- (id)scrollsToTop
+- (NSNumber *)scrollsToTop
 {
-    return NUMBOOL([[[[self webView] webView] scrollView] scrollsToTop]);
+    return @([[[[self webView] webView] scrollView] scrollsToTop]);
 }
 
-- (id)allowsBackForwardNavigationGestures
+- (NSNumber *)allowsBackForwardNavigationGestures
 {
-    return NUMBOOL([[[self webView] webView] allowsBackForwardNavigationGestures]);
+    return @([[[self webView] webView] allowsBackForwardNavigationGestures]);
 }
 
-- (id)userAgent
+- (NSString *)userAgent
 {
     return [[[self webView] webView] customUserAgent] ?: [NSNull null];
 }
 
-- (id)url
+- (NSString *)url
 {
     return [[[[self webView] webView] URL] absoluteString];
 }
 
-- (id)title
+- (NSString *)title
 {
     return [[[self webView] webView] title];
 }
 
-- (id)progress
+- (NSNumber *)progress
 {
-    return NUMDOUBLE([[[self webView] webView] estimatedProgress]);
+    return @([[[self webView] webView] estimatedProgress]);
 }
 
-- (id)secure
+- (NSNumber *)secure
 {
-    return NUMBOOL([[[self webView] webView] hasOnlySecureContent]);
+    return @([[[self webView] webView] hasOnlySecureContent]);
 }
 
-- (id)backForwardList
+- (NSDictionary *)backForwardList
 {
     WKBackForwardList *list = [[[self webView] webView] backForwardList];
     
@@ -214,7 +214,7 @@
     };
 }
 
-- (id)preferences
+- (NSDictionary *)preferences
 {
     return @{
         @"minimumFontSize": NUMFLOAT([[[[[self webView] webView] configuration] preferences] minimumFontSize]),
@@ -223,41 +223,52 @@
     };
 }
 
-- (id)selectionGranularity
+- (NSNumber *)selectionGranularity
 {
-    return NUMINTEGER([[[[self webView] webView] configuration] selectionGranularity]);
+    return @([[[[self webView] webView] configuration] selectionGranularity]);
 }
 
-- (id)mediaTypesRequiringUserActionForPlayback
+- (NSNumber *)mediaTypesRequiringUserActionForPlayback
 {
-    return NUMUINTEGER([[[[self webView] webView] configuration] mediaTypesRequiringUserActionForPlayback]);
+    return @([[[[self webView] webView] configuration] mediaTypesRequiringUserActionForPlayback]);
 }
 
-- (id)suppressesIncrementalRendering
+- (NSNumber *)suppressesIncrementalRendering
 {
-    NUMBOOL([[[[self webView] webView] configuration] suppressesIncrementalRendering]);
+    return @([[[[self webView] webView] configuration] suppressesIncrementalRendering]);
 }
 
-- (id)allowsInlineMediaPlayback
+- (NSNumber *)allowsInlineMediaPlayback
 {
-    NUMBOOL([[[[self webView] webView] configuration] allowsInlineMediaPlayback]);
+    return @([[[[self webView] webView] configuration] allowsInlineMediaPlayback]);
 }
 
-- (id)allowsAirPlayMediaPlayback
+- (NSNumber *)allowsAirPlayMediaPlayback
 {
-    NUMBOOL([[[[self webView] webView] configuration] allowsAirPlayForMediaPlayback]);
+    return @([[[[self webView] webView] configuration] allowsAirPlayForMediaPlayback]);
 }
 
-- (id)allowsPictureInPictureMediaPlayback
+- (NSNumber *)allowsPictureInPictureMediaPlayback
 {
-    NUMBOOL([[[[self webView] webView] configuration] allowsPictureInPictureMediaPlayback]);
+    return @([[[[self webView] webView] configuration] allowsPictureInPictureMediaPlayback]);
 }
 
-- (id)allowedURLSchemes
+- (NSArray<NSString *> *)allowedURLSchemes
 {
     return _allowedURLSchemes;
 }
+
+- (NSNumber *)zoomLevel
+{
+    NSString *zoomLevel = [self evalJS:@[@"document.body.style.zoom"]];
     
+    if (zoomLevel == nil || zoomLevel.length == 0) {
+        return @(1.0);
+    }
+    
+    return @([zoomLevel doubleValue]);
+}
+
 #pragma mark Setter
     
 - (void)setAllowedURLSchemes:(NSArray *)schemes

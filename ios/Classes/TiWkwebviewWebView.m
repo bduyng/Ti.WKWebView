@@ -57,6 +57,14 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     return _webView;
 }
 
+- (void)setZoomLevel_:(id)zoomLevel
+{
+    ENSURE_TYPE(zoomLevel, NSNumber);
+    
+    [[self webView] evaluateJavaScript:[NSString stringWithFormat:@"document.body.style.zoom = %@;", zoomLevel]
+                     completionHandler:nil];
+}
+
 - (void)registerNotificationCenter
 {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didFireEvent:) name:kTiWKFireEvent object:nil];
