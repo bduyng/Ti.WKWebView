@@ -324,6 +324,11 @@
     [[[self webView] webView] reload];
 }
 
+- (void)repaint:(id)unused
+{
+    [self contentsWillChange];
+}
+
 - (void)goBack:(id)unused
 {
     [[[self webView] webView] goBack];
