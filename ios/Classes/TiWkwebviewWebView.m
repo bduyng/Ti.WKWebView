@@ -303,13 +303,12 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     ENSURE_TYPE(value, NSNumber);
 
     BOOL disableContextMenu = [TiUtils boolValue:value];
-    
+
     if (disableContextMenu == YES) {
         WKUserContentController *controller = [[[self webView] configuration] userContentController];
         [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
     }
 }
-
 
 #pragma mark Utilities
 
@@ -709,6 +708,8 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler
 {
+    NSArray<NSString *> *allowedURLSchemes = [[self proxy] valueForKey:@"allowedURLSchemes"];
+
     // Handle blacklisted URL's
     if (_blacklistedURLs != nil && _blacklistedURLs.count > 0) {
         NSString *urlCandidate = webView.URL.absoluteString;
@@ -735,7 +736,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
         }];
     }
 
-    if ([[[self proxy] valueForKey:@"allowedURLSchemes"] containsObject:navigationAction.request.URL.scheme]) {
+    if ([allowedURLSchemes containsObject:navigationAction.request.URL.scheme]) {
         if ([[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL]) {
             // Event to return url to Titanium in order to handle OAuth and more
             if ([[self proxy] _hasListeners:@"handleurl"]) {
@@ -743,7 +744,6 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
                     @"url": [TiUtils stringValue:[[navigationAction request] URL]],
                     @"handler": [[TiWkwebviewDecisionHandlerProxy alloc] _initWithPageContext:[[self proxy] pageContext] andDecisionHandler:decisionHandler]
                 }];
-                return;
             } else {
                 // DEPRECATED: Should use the "handleurl" event instead and call openURL on Ti.Platform.openURL instead
                 DebugLog(@"[WARN] Please use the \"handleurl\" event together with \"allowedURLSchemes\" in Ti.WKWebView 2.5.0 and later.");
@@ -751,12 +751,11 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
                 [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
                 decisionHandler(WKNavigationActionPolicyCancel);
-                return;
             }
         }
+    } else {
+        decisionHandler(WKNavigationActionPolicyAllow);
     }
-    
-    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
 #pragma mark Internal Utilities
