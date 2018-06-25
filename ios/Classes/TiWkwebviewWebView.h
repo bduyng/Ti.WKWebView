@@ -19,6 +19,7 @@
     CGFloat autoWidth;
     
     BOOL willHandleTouches;
+    NSArray<NSString *> *_blacklistedURLs;
 }
     
 - (void)setHtml_:(id)args;

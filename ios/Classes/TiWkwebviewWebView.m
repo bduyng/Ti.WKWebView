@@ -181,11 +181,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
     }
-    
-    if ([[self proxy] _hasListeners:@"beforeload"]) {
-        [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [[NSBundle mainBundle] bundlePath], @"data": [TiUtils stringValue:value]}];
-    }
-    
+
     NSData *data = nil;
     
     if ([value isKindOfClass:[TiBlob class]]) {
@@ -202,6 +198,17 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
                     MIMEType:[TiWkwebviewWebView mimeTypeForData:data]
        characterEncodingName:@"UTF-8" // TODO: Support other character-encodings as well
                      baseURL:[[NSBundle mainBundle] resourceURL]];
+}
+
+- (void)setBlacklistedURLs_:(id)blacklistedURLs
+{
+    ENSURE_TYPE(blacklistedURLs, NSArray);
+
+    for (id blacklistedURL in blacklistedURLs) {
+        ENSURE_TYPE(blacklistedURL, NSString);
+    }
+    
+    _blacklistedURLs = blacklistedURLs;
 }
 
 - (void)setHtml_:(id)args
@@ -224,10 +231,6 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
    
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
-    }
-    
-    if ([[self proxy] _hasListeners:@"beforeload"]) {
-        [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [[NSBundle mainBundle] bundlePath], @"html": content}];
     }
   
     // No options, default load behavior
@@ -703,6 +706,25 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler
 {
+    // Handle blacklisted URL's
+    if (_blacklistedURLs != nil && _blacklistedURLs.count > 0) {
+        NSString *urlCandidate = webView.URL.absoluteString;
+        
+        for (NSString *blackListedURL in _blacklistedURLs) {
+            if ([urlCandidate rangeOfString:blackListedURL options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                if ([[self proxy] _hasListeners:@"blacklisturl"]) {
+                    [[self proxy] fireEvent:@"blacklisturl" withObject:@{
+                        @"url" : urlCandidate,
+                        @"message" : @"Webview did not load blacklisted url."
+                    }];
+                }
+
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
+            }
+        }
+    }
+
     if ([[self proxy] _hasListeners:@"beforeload"]) {
         [[self proxy] fireEvent:@"beforeload" withObject:@{
             @"url": webView.URL.absoluteString,
