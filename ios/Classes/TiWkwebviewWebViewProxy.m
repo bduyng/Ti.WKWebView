@@ -370,7 +370,7 @@
     genericProperties = nil;
 }
 
-- (void)evalJS:(id)args
+- (id)evalJS:(id)args
 {
     NSString *code = nil;
     KrollCallback *callback = nil;
@@ -380,7 +380,7 @@
 
     // If no argument is passed, return in sync (NOT recommended)
     if (callback == nil) {
-        return [self evalJSSync:code];
+        return [self evalJSSync:@[code]];
     }
 
     [[[self webView] webView] evaluateJavaScript:code completionHandler:^(id result, NSError *error) {
