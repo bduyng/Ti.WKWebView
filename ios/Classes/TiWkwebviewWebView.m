@@ -208,13 +208,24 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
                      baseURL:[[NSBundle mainBundle] resourceURL]];
 }
 
-- (void)setHtml_:(id)value
+- (void)setHtml_:(id)args
 {
-    ENSURE_TYPE(value, NSString);
-    [[self proxy] replaceValue:value forKey:@"html" notification:NO];
-   
-    NSString *content = [TiUtils stringValue:value];
+    NSString *content;
+    NSDictionary *options;
+    
+    if ([args isKindOfClass:[NSArray class]]) {
+        content = [TiUtils stringValue:[args objectAtIndex:0]];
+        if ([args count] == 2) {
+            options = [args objectAtIndex:1];
+        }
+    } else if ([args isKindOfClass:[NSString class]]) {
+        content = [TiUtils stringValue:args];
+    } else {
+        [self throwException:@"Invalid argument" subreason:@"Requires single string argument or two arguments (String, Object)" location:CODELOCATION];
+    }
 
+    [[self proxy] replaceValue:content forKey:@"html" notification:NO];
+   
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
     }
@@ -222,8 +233,21 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     if ([[self proxy] _hasListeners:@"beforeload"]) {
         [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [[NSBundle mainBundle] bundlePath], @"html": content}];
     }
+  
+    // No options, default load behavior
+    if (options == nil) {
+        [[self webView] loadHTMLString:content baseURL:nil];
+        return;
+    }
     
-    [[self webView] loadHTMLString:content baseURL:nil];
+    // Options available, handle them!
+    NSString *baseURL = options[@"baseURL"];
+    NSString *mimeType = options[@"mimeType"];
+    
+    [[self webView] loadData:[content dataUsingEncoding:NSUTF8StringEncoding]
+                    MIMEType:mimeType
+       characterEncodingName:@"UTF-8"
+                     baseURL:baseURL];
 }
 
 - (void)setDisableBounce_:(id)value

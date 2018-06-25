@@ -267,6 +267,11 @@
     _allowedURLSchemes = schemes;
 }
 
+- (void)setHtml:(id)args
+{
+    [[self webView] setHtml_:args];
+}
+
 #pragma mark Methods
 
 - (void)addUserScript:(id)args
@@ -373,6 +378,11 @@
     ENSURE_ARG_AT_INDEX(code, args, 0, NSString);
     ENSURE_ARG_OR_NIL_AT_INDEX(callback, args, 1, KrollCallback);
 
+    // If no argument is passed, return in sync (NOT recommended)
+    if (callback == nil) {
+        return [self evalJSSync:code];
+    }
+
     [[[self webView] webView] evaluateJavaScript:code completionHandler:^(id result, NSError *error) {
         if (!callback) {
             return;
@@ -389,6 +399,8 @@
         
         [callback call:[[NSArray alloc] initWithObjects:&event count:1] thisObject:self];
     }];
+    
+    return nil;
 }
 
 - (NSString *)evalJSSync:(id)args

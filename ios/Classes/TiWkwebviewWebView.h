@@ -20,6 +20,8 @@
     
     BOOL willHandleTouches;
 }
+    
+- (void)setHtml_:(id)args;
 
 - (void)registerNotificationCenter;
 
