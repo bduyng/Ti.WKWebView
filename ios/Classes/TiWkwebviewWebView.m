@@ -1,6 +1,6 @@
 /**
  * Appcelerator Titanium Mobile
- * Copyright (c) 2009-present by Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2009-2018 by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
@@ -246,7 +246,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     [[self webView] loadData:[content dataUsingEncoding:NSUTF8StringEncoding]
                     MIMEType:mimeType
        characterEncodingName:@"UTF-8"
-                     baseURL:baseURL];
+                     baseURL:[NSURL URLWithString:baseURL]];
 }
 
 - (void)setDisableBounce_:(id)value
@@ -559,9 +559,12 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
             } else if ([method isEqualToString:@"log"]) {
                 NSString *level = [event objectForKey:@"level"];
                 NSString *message = [event objectForKey:@"message"];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
                 if ([tiModule respondsToSelector:@selector(log:)]) {
                     [tiModule performSelector:@selector(log:) withObject:@[level, message]];
                 }
+#pragma clang diagnostic pop
             }
             return;
         }
