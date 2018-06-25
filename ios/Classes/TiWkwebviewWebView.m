@@ -576,28 +576,40 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler
 {
-    id basicAuthentication = [[self proxy] valueForKey:@"basicAuthentication"];
-    
-    NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
-    NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
-    NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
-    
-    // Allow invalid certificates if specified
-    if ([TiUtils boolValue:[[self proxy] valueForKey:@"ignoreSslError"] def:NO]) {
-        NSURLCredential * credential = [[NSURLCredential alloc] initWithTrust:[challenge protectionSpace].serverTrust];
-        completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
-        
-        return;
-    }
-    
+    NSString *authenticationMethod = [[challenge protectionSpace] authenticationMethod];
+    NSDictionary<NSString *, NSString *> *basicAuthentication = [[self proxy] valueForKey:@"basicAuthentication"];
+    BOOL ignoreSSLError = [TiUtils boolValue:[[self proxy] valueForKey:@"ignoreSslError"] def:NO];
+
     // Basic authentication
-    if (!basicAuthentication && username && password) {
-        completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
-                                                                                               password:password
-                                                                                            persistence:persistence]);
-     // Default handling
-    } else {
+    if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodDefault]
+        || [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic]
+        || [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest]) {
+
+        // If "basicAuthentication" property set -> Try to handle
+        if (basicAuthentication != nil) {
+            NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
+            NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
+            NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
+
+            completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
+                                                                                                   password:password
+                                                                                                persistence:persistence]);
+        // If "ignoreSslError" is set, ignore the possible error
+        } else if (ignoreSSLError) {
+            // Allow invalid certificates if specified
+            NSURLCredential * credential = [[NSURLCredential alloc] initWithTrust:[challenge protectionSpace].serverTrust];
+            completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
+        // Default: Reject authentication challenge
+        } else {
+            [self.proxy fireEvent:@"sslerror"];
+            completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
+        }
+    // HTTPS in general
+    } else if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
         completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+    // Default: Reject authentication challenge
+    } else {
+        completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
     }
 }
 
@@ -610,22 +622,12 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
-    if ([[self proxy] _hasListeners:@"error"]) {
-        [[self proxy] fireEvent:@"error" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title, @"error": [error localizedDescription]}];
-    }
+    [self _fireErrorEventWithError:error];
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
-    if ([[self proxy] _hasListeners:@"error"]) {
-        NSURL *errorURL = webView.URL;
-
-        if (errorURL.absoluteString == nil) {
-            errorURL = [NSURL URLWithString:[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]];
-        }
-        
-        [[self proxy] fireEvent:@"error" withObject:@{@"url": NULL_IF_NIL(errorURL ? errorURL.absoluteString : nil), @"title": NULL_IF_NIL(webView.title), @"error": [error localizedDescription]}];
-    }
+    [self _fireErrorEventWithError:error];
 }
 
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation
@@ -732,10 +734,30 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     decisionHandler(WKNavigationActionPolicyAllow);
 }
 
+#pragma mark Internal Utilities
+
 static NSString *UIKitLocalizedString(NSString *string)
 {
     NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
     return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
+}
+
+- (void)_fireErrorEventWithError:(NSError *)error
+{
+    if ([[self proxy] _hasListeners:@"error"]) {
+        NSURL *errorURL = _webView.URL;
+        
+        if (errorURL.absoluteString == nil) {
+            errorURL = [NSURL URLWithString:[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]];
+        }
+        
+        [[self proxy] fireEvent:@"error" withObject:@{
+            @"success": @NO,
+            @"code": @(error.code),
+            @"url": NULL_IF_NIL(errorURL),
+            @"error": [error localizedDescription]
+        }];
+    }
 }
 
 #pragma mark Layout helper
