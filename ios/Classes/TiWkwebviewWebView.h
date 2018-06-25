@@ -18,15 +18,16 @@
     CGFloat autoHeight;
     CGFloat autoWidth;
     
-    BOOL willHandleTouches;
+    BOOL _willHandleTouches;
     NSArray<NSString *> *_blacklistedURLs;
 }
-    
+
+// Used from the proxy
 - (void)setHtml_:(id)args;
 
 - (void)registerNotificationCenter;
 
-- (WKWebView *) webView;
+- (WKWebView *)webView;
 
 - (void)fireEvent:(id)listener withObject:(id)obj remove:(BOOL)yn thisObject:(id)thisObject_;
 

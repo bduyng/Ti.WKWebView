@@ -39,7 +39,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
         [controller addScriptMessageHandler:self name:@"Ti"];
 
         [config setUserContentController:controller];
-        willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
+        _willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
         
         _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:config];
         
@@ -104,7 +104,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *view = [super hitTest:point withEvent:event];
-    if (([self hasTouchableListener]) && willHandleTouches) {
+    if (([self hasTouchableListener]) && _willHandleTouches) {
         UIView *superView = [view superview];
         UIView *parentSuperView = [superView superview];
         
@@ -116,12 +116,12 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     return view;
 }
 
--(void)setWillHandleTouches_:(id)value
+- (void)setWillHandleTouches_:(id)value
 {
     ENSURE_TYPE(value, NSNumber);
     
     [[self proxy] replaceValue:value forKey:@"willHandleTouches" notification:NO];
-    willHandleTouches = [TiUtils boolValue:value def:YES];
+    _willHandleTouches = [TiUtils boolValue:value def:YES];
 }
 
 - (void)fireEvent:(id)listener withObject:(id)obj remove:(BOOL)yn thisObject:(id)thisObject_
