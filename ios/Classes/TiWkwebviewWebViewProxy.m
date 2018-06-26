@@ -51,6 +51,21 @@
   [[self host] registerContext:self forToken:_pageToken];
 }
 
+- (void)refreshHTMLContent
+{
+    NSString *code = @"document.documentElement.outerHTML.toString()";
+
+    // Refresh the "html" property async to be able to use the remote HTML content.
+    // This should be deprecated asap, since it is an overhead that should be done using
+    //webView.evalJS() within the app if required.
+    [[[self webView] webView] evaluateJavaScript:code completionHandler:^(id result, NSError *error) {
+        if (error != nil) {
+            return;
+        }
+        [self replaceValue:result forKey:@"html" notification:NO];
+    }];
+}
+
 - (void)windowDidClose
 {
   if (_pageToken != nil) {

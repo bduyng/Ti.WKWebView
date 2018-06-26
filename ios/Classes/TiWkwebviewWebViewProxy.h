@@ -14,6 +14,7 @@
     NSString *_pageToken;
 }
 
+- (void)refreshHTMLContent;
 - (void)setPageToken:(NSString *)pageToken;
 
 @end

@@ -650,6 +650,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
     [self _cleanupLoadingIndicator];
+    [(TiWkwebviewWebViewProxy *)[self proxy] refreshHTMLContent];
 
     if ([[self proxy] _hasListeners:@"load"]) {
         [[self proxy] fireEvent:@"load" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
