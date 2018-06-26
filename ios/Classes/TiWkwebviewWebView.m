@@ -17,6 +17,8 @@
 #import "TiCallbackManager.h"
 #import "SBJSON.h"
 
+#import <objc/runtime.h>
+
 extern NSString * const kTiWKFireEvent;
 extern NSString * const kTiWKAddEventListener;
 extern NSString * const kTiWKEventCallback;
@@ -549,6 +551,35 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     return nil;
 }
 
+- (void)setKeyboardDisplayRequiresUserAction_:(id)value
+{
+    [TiWkwebviewWebView _setKeyboardDisplayRequiresUserAction:[TiUtils boolValue:value]];
+    [[self proxy] replaceValue:value forKey:@"keyboardDisplayRequiresUserAction" notification:NO];
+}
+
+// WARNING: This is not officially available in WKWebView!
++ (void)_setKeyboardDisplayRequiresUserAction:(BOOL)value {
+    Class class = NSClassFromString([NSString stringWithFormat:@"W%@tV%@", @"KConten", @"iew"]);
+    
+    if ([TiUtils isIOSVersionOrGreater:@"11.3"]) {
+        SEL selector = sel_getUid("_startAssistingNode:userIsInteracting:blurPreviousNode:changingActivityState:userObject:");
+        Method method = class_getInstanceMethod(class, selector);
+        IMP original = method_getImplementation(method);
+        IMP override = imp_implementationWithBlock(^void(id me, void* arg0, BOOL arg1, BOOL arg2, BOOL arg3, id arg4) {
+            ((void (*)(id, SEL, void*, BOOL, BOOL, BOOL, id))original)(me, selector, arg0, !value, arg2, arg3, arg4);
+        });
+        method_setImplementation(method, override);
+    } else {
+        SEL selector = sel_getUid("_startAssistingNode:userIsInteracting:blurPreviousNode:userObject:");
+        Method method = class_getInstanceMethod(class, selector);
+        IMP original = method_getImplementation(method);
+        IMP override = imp_implementationWithBlock(^void(id me, void* arg0, BOOL arg1, BOOL arg2, id arg3) {
+            ((void (*)(id, SEL, void*, BOOL, BOOL, id))original)(me, selector, arg0,!value, arg2, arg3);
+        });
+        method_setImplementation(method, override);
+    }
+}
+    
 #pragma mark Delegates
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message

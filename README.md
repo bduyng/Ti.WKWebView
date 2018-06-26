@@ -67,6 +67,7 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | willHandleTouches | Boolean |
 | requestHeaders | Object<String, Any> |
 | zoomLevel | Number |
+| keyboardDisplayRequiresUserAction | Boolean |
 
 #### Methods
 
