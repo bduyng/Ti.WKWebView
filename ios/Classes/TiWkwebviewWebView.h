@@ -21,6 +21,7 @@
     BOOL _willHandleTouches;
     NSArray<NSString *> *_blacklistedURLs;
     NSURL *_currentURL;
+    UIActivityIndicatorView *_loadingIndicator;
 }
 
 // Used from the proxy

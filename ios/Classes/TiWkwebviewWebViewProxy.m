@@ -362,6 +362,11 @@
     return NUMBOOL([[[self webView] webView] canGoForward]);
 }
 
+- (NSNumber *)loading
+{
+    return @([[[self webView] webView] isLoading]);
+}
+
 - (void)startListeningToProperties:(id)args
 {
     ENSURE_SINGLE_ARG(args, NSArray);

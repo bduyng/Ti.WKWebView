@@ -10,6 +10,7 @@
 #import "TiWkwebviewWebViewProxy.h"
 #import "TiWkwebviewConfigurationProxy.h"
 #import "TiWkwebviewDecisionHandlerProxy.h"
+#import "Webcolor.h"
 
 #import "TiFilesystemFileProxy.h"
 #import "TiApp.h"
@@ -52,11 +53,14 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
         [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
         
         [self addSubview:_webView];
+        [self _initializeLoadingIndicator];
     }
     
     return _webView;
 }
 
+#pragma mark Public API's
+  
 - (void)setZoomLevel_:(id)zoomLevel
 {
     ENSURE_TYPE(zoomLevel, NSNumber);
@@ -547,7 +551,6 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 #pragma mark Delegates
 
-
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
     BOOL isEvent = [[message body] isKindOfClass:[NSDictionary class]] && [[message body] objectForKey:@"name"];
@@ -646,6 +649,8 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
+    [self _cleanupLoadingIndicator];
+
     if ([[self proxy] _hasListeners:@"load"]) {
         [[self proxy] fireEvent:@"load" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
     }
@@ -653,11 +658,13 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
+    [self _cleanupLoadingIndicator];
     [self _fireErrorEventWithError:error];
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
+    [self _cleanupLoadingIndicator];
     [self _fireErrorEventWithError:error];
 }
 
@@ -750,6 +757,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
                 }
 
                 decisionHandler(WKNavigationActionPolicyCancel);
+                [self _cleanupLoadingIndicator];
                 return;
             }
         }
@@ -825,6 +833,61 @@ static NSString *UIKitLocalizedString(NSString *string)
             @"error": [error localizedDescription]
         }];
     }
+}
+
+
+- (void)_initializeLoadingIndicator
+{
+    BOOL hideLoadIndicator = [TiUtils boolValue:[self.proxy valueForKey:@"hideLoadIndicator"] def:NO];
+    
+    if ([TiWkwebviewWebView _isLocalURL:_webView.URL] || hideLoadIndicator) {
+        return;
+    }
+    
+    TiColor *backgroundColor = [TiUtils colorValue:[self.proxy valueForKey:@"backgroundColor"]];
+    UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleGray;
+    
+    if (backgroundColor != nil && [Webcolor isDarkColor:backgroundColor.color]) {
+        style = UIActivityIndicatorViewStyleWhite;
+    }
+    _loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
+    [_loadingIndicator setHidesWhenStopped:YES];
+    
+    [self addSubview:_loadingIndicator];
+    
+    UIView *superview = self;
+    NSDictionary *variables = NSDictionaryOfVariableBindings(_loadingIndicator, superview);
+    NSArray<NSLayoutConstraint *> *verticalConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:[superview]-(<=1)-[_loadingIndicator]"
+                                            options: NSLayoutFormatAlignAllCenterX
+                                            metrics:nil
+                                              views:variables];
+    [self addConstraints:verticalConstraints];
+    
+    NSArray<NSLayoutConstraint *> *horizontalConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"H:[superview]-(<=1)-[_loadingIndicator]"
+                                            options: NSLayoutFormatAlignAllCenterY
+                                            metrics:nil
+                                              views:variables];
+    [self addConstraints:horizontalConstraints];
+    [_loadingIndicator startAnimating];
+}
+
+- (void)_cleanupLoadingIndicator
+{
+    if (_loadingIndicator == nil) return;
+    
+    [UIView beginAnimations:@"_hideAnimation" context:nil];
+    [UIView setAnimationDuration:0.3];
+    [_loadingIndicator removeFromSuperview];
+    [UIView commitAnimations];
+    _loadingIndicator = nil;
+}
+
++ (BOOL)_isLocalURL:(NSURL *)url
+{
+    NSString *scheme = [url scheme];
+    return [scheme isEqualToString:@"file"] || [scheme isEqualToString:@"app"];
 }
 
 #pragma mark Layout helper
