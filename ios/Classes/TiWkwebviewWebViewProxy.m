@@ -69,6 +69,81 @@
   }
   [super _destroy];
 }
+
+#pragma mark - TiEvaluator Protocol
+
+- (NSString *)basename
+{
+    return nil;
+}
+
+- (NSURL *)currentURL
+{
+    return nil;
+}
+
+- (void)setCurrentURL:(NSURL *)unused
+{
+}
+
+- (void)evalFile:(NSString *)path
+{
+    NSURL *url_ = [path hasPrefix:@"file:"] ? [NSURL URLWithString:path] : [NSURL fileURLWithPath:path];
+    
+    if (![path hasPrefix:@"/"] && ![path hasPrefix:@"file:"]) {
+        NSURL *root = [[self _host] baseURL];
+        url_ = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", root, path]];
+    }
+    
+    NSString *code = [NSString stringWithContentsOfURL:url_ encoding:NSUTF8StringEncoding error:nil];
+    [[[self webView] webView] evaluateJavaScript:code completionHandler:^(id _Nullablecresult, NSError * _Nullable error) {
+    }];
+}
+
+- (NSString *)evalJSAndWait:(NSString *)code
+{
+    return [self evalJSSync:code];
+}
+
+- (void)evalJSWithoutResult:(NSString *)code
+{
+    [self evalJS:code];
+}
+
+- (BOOL)evaluationError
+{
+    return NO;
+}
+
+- (KrollContext *)krollContext
+{
+    return nil;
+}
+
+- (id)krollObjectForProxy:(id)proxy
+{
+    return nil;
+}
+
+- (id)preloadForKey:(id)key name:(id)name
+{
+    return nil;
+}
+
+- (id)registerProxy:(id)proxy
+{
+    return nil;
+}
+
+- (void)unregisterProxy:(id)proxy
+{
+}
+
+- (BOOL)usesProxy:(id)proxy
+{
+    return NO;
+}
+
 #pragma mark - Public APIs
 
 #pragma mark Getters
