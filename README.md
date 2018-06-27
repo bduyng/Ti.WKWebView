@@ -44,7 +44,7 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | Name | Type |
 |------|------|
 | disableBounce | Boolean |
-| scalePageToFit | Boolean |
+| scalesPageToFit | Boolean |
 | disableZoom | Boolean |
 | allowsBackForwardNavigationGestures | Boolean |
 | allowsLinkPreview | Boolean |

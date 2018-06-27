@@ -182,7 +182,7 @@
 
 - (NSString *)userAgent
 {
-    return [[[self webView] webView] customUserAgent] ?: [NSNull null];
+    return [[[self webView] webView] customUserAgent];
 }
 
 - (NSString *)url
@@ -415,6 +415,13 @@
     
     ENSURE_ARG_AT_INDEX(code, args, 0, NSString);
     ENSURE_ARG_OR_NIL_AT_INDEX(callback, args, 1, KrollCallback);
+    
+    if (code == nil) {
+        [self throwException:@"Missing JavaScript code"
+                   subreason:@"The required first argument is missinf and should contain a valid JavaScript string."
+                    location:CODELOCATION];
+        return nil;
+    }
 
     // If no argument is passed, return in sync (NOT recommended)
     if (callback == nil) {

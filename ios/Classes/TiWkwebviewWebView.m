@@ -295,16 +295,16 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     }
 }
 
--(void)setScalePageToFit_:(id)value
+-(void)setScalesPageToFit_:(id)value
 {
     ENSURE_TYPE(value, NSNumber);
     
-    BOOL scalePageToFit = [TiUtils boolValue:value];
+    BOOL scalesPageToFit = [TiUtils boolValue:value];
     BOOL disableZoom = [TiUtils boolValue:[[self proxy] valueForKey: @"disableZoom"]];
     
-    if (scalePageToFit && !disableZoom) {
+    if (scalesPageToFit && !disableZoom) {
         WKUserContentController *controller = [[[self webView] configuration] userContentController];
-        [controller addUserScript:[TiWkwebviewWebView userScriptScalePageToFit]];
+        [controller addUserScript:[TiWkwebviewWebView userScriptScalesPageToFit]];
     }
 }
 
@@ -344,7 +344,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     [[self webView] loadRequest:request];
 }
 
-+ (WKUserScript *)userScriptScalePageToFit
++ (WKUserScript *)userScriptScalesPageToFit
 {
     NSString *source = @"var meta = document.createElement('meta'); \
     meta.setAttribute('name', 'viewport'); \
