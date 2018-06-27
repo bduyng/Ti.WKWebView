@@ -1,6 +1,6 @@
 /**
  * Appcelerator Titanium Mobile
- * Copyright (c) 2009-2016 by Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2009-2018 by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
@@ -18,12 +18,18 @@
     CGFloat autoHeight;
     CGFloat autoWidth;
     
-    BOOL willHandleTouches;
+    BOOL _willHandleTouches;
+    NSArray<NSString *> *_blacklistedURLs;
+    NSURL *_currentURL;
+    UIActivityIndicatorView *_loadingIndicator;
 }
+
+// Used from the proxy
+- (void)setHtml_:(id)args;
 
 - (void)registerNotificationCenter;
 
-- (WKWebView *) webView;
+- (WKWebView *)webView;
 
 - (void)fireEvent:(id)listener withObject:(id)obj remove:(BOOL)yn thisObject:(id)thisObject_;
 

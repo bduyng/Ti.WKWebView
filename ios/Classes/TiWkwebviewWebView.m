@@ -1,6 +1,6 @@
 /**
  * Appcelerator Titanium Mobile
- * Copyright (c) 2009-present by Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2009-2018 by Appcelerator, Inc. All Rights Reserved.
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
@@ -10,11 +10,14 @@
 #import "TiWkwebviewWebViewProxy.h"
 #import "TiWkwebviewConfigurationProxy.h"
 #import "TiWkwebviewDecisionHandlerProxy.h"
+#import "Webcolor.h"
 
 #import "TiFilesystemFileProxy.h"
 #import "TiApp.h"
 #import "TiCallbackManager.h"
 #import "SBJSON.h"
+
+#import <objc/runtime.h>
 
 extern NSString * const kTiWKFireEvent;
 extern NSString * const kTiWKAddEventListener;
@@ -39,7 +42,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
         [controller addScriptMessageHandler:self name:@"Ti"];
 
         [config setUserContentController:controller];
-        willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
+        _willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
         
         _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:config];
         
@@ -52,9 +55,20 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
         [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
         
         [self addSubview:_webView];
+        [self _initializeLoadingIndicator];
     }
     
     return _webView;
+}
+
+#pragma mark Public API's
+  
+- (void)setZoomLevel_:(id)zoomLevel
+{
+    ENSURE_TYPE(zoomLevel, NSNumber);
+    
+    [[self webView] evaluateJavaScript:[NSString stringWithFormat:@"document.body.style.zoom = %@;", zoomLevel]
+                     completionHandler:nil];
 }
 
 - (void)registerNotificationCenter
@@ -104,7 +118,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *view = [super hitTest:point withEvent:event];
-    if (([self hasTouchableListener]) && willHandleTouches) {
+    if (([self hasTouchableListener]) && _willHandleTouches) {
         UIView *superView = [view superview];
         UIView *parentSuperView = [superView superview];
         
@@ -116,12 +130,12 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     return view;
 }
 
--(void)setWillHandleTouches_:(id)value
+- (void)setWillHandleTouches_:(id)value
 {
     ENSURE_TYPE(value, NSNumber);
     
     [[self proxy] replaceValue:value forKey:@"willHandleTouches" notification:NO];
-    willHandleTouches = [TiUtils boolValue:value def:YES];
+    _willHandleTouches = [TiUtils boolValue:value def:YES];
 }
 
 - (void)fireEvent:(id)listener withObject:(id)obj remove:(BOOL)yn thisObject:(id)thisObject_
@@ -149,18 +163,10 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
     }
-    
-    if ([[self proxy] _hasListeners:@"beforeload"]) {
-        [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [TiUtils stringValue:value]}];
-    }
-    
+
     // Handle remote URL's
     if ([value hasPrefix:@"http"] || [value hasPrefix:@"https"]) {
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[TiUtils stringValue:value]]
-                                                 cachePolicy:[TiUtils intValue:[[self proxy] valueForKey:@"cachePolicy"] def:NSURLRequestUseProtocolCachePolicy]
-                                             timeoutInterval:[TiUtils doubleValue:[[self proxy] valueForKey:@"timeout"]  def:60]];
-        [[self webView] loadRequest:request];
-        
+        [self loadRequestWithURL:[NSURL URLWithString:[TiUtils stringValue:value]]];
     // Handle local URL's (WiP)
     } else {
         NSString *path = [[TiUtils toURL:value proxy:self.proxy] absoluteString];
@@ -185,11 +191,7 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
     }
-    
-    if ([[self proxy] _hasListeners:@"beforeload"]) {
-        [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [[NSBundle mainBundle] bundlePath], @"data": [TiUtils stringValue:value]}];
-    }
-    
+
     NSData *data = nil;
     
     if ([value isKindOfClass:[TiBlob class]]) {
@@ -208,22 +210,53 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
                      baseURL:[[NSBundle mainBundle] resourceURL]];
 }
 
-- (void)setHtml_:(id)value
+- (void)setBlacklistedURLs_:(id)blacklistedURLs
 {
-    ENSURE_TYPE(value, NSString);
-    [[self proxy] replaceValue:value forKey:@"html" notification:NO];
-   
-    NSString *content = [TiUtils stringValue:value];
+    ENSURE_TYPE(blacklistedURLs, NSArray);
 
+    for (id blacklistedURL in blacklistedURLs) {
+        ENSURE_TYPE(blacklistedURL, NSString);
+    }
+    
+    _blacklistedURLs = blacklistedURLs;
+}
+
+- (void)setHtml_:(id)args
+{
+    NSString *content;
+    NSDictionary *options;
+    
+    if ([args isKindOfClass:[NSArray class]]) {
+        content = [TiUtils stringValue:[args objectAtIndex:0]];
+        if ([args count] == 2) {
+            options = [args objectAtIndex:1];
+        }
+    } else if ([args isKindOfClass:[NSString class]]) {
+        content = [TiUtils stringValue:args];
+    } else {
+        [self throwException:@"Invalid argument" subreason:@"Requires single string argument or two arguments (String, Object)" location:CODELOCATION];
+    }
+
+    [[self proxy] replaceValue:content forKey:@"html" notification:NO];
+   
     if ([[self webView] isLoading]) {
         [[self webView] stopLoading];
     }
-    
-    if ([[self proxy] _hasListeners:@"beforeload"]) {
-        [[self proxy] fireEvent:@"beforeload" withObject:@{@"url": [[NSBundle mainBundle] bundlePath], @"html": content}];
+  
+    // No options, default load behavior
+    if (options == nil) {
+        [[self webView] loadHTMLString:content baseURL:nil];
+        return;
     }
     
-    [[self webView] loadHTMLString:content baseURL:nil];
+    // Options available, handle them!
+    NSString *baseURL = options[@"baseURL"];
+    NSString *mimeType = options[@"mimeType"];
+    
+    [[self webView] loadData:[content dataUsingEncoding:NSUTF8StringEncoding]
+                    MIMEType:mimeType
+       characterEncodingName:@"UTF-8"
+                     baseURL:[NSURL URLWithString:baseURL]];
 }
 
 - (void)setDisableBounce_:(id)value
@@ -280,15 +313,36 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     ENSURE_TYPE(value, NSNumber);
 
     BOOL disableContextMenu = [TiUtils boolValue:value];
-    
+
     if (disableContextMenu == YES) {
         WKUserContentController *controller = [[[self webView] configuration] userContentController];
         [controller addUserScript:[TiWkwebviewWebView userScriptDisableContextMenu]];
     }
 }
 
-
 #pragma mark Utilities
+
+- (void)loadRequestWithURL:(NSURL *)url
+{
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
+                                                           cachePolicy:[TiUtils intValue:[[self proxy] valueForKey:@"cachePolicy"] def:NSURLRequestUseProtocolCachePolicy]
+                                                       timeoutInterval:[TiUtils doubleValue:[[self proxy] valueForKey:@"timeout"] def:60]];
+
+    // Set request headers
+    NSDictionary<NSString *, id> *requestHeaders = [[self proxy] valueForKey:@"requestHeaders"];
+    
+    if (requestHeaders != nil) {
+        for (NSString *key in requestHeaders) {
+            [request setValue:requestHeaders[key] forHTTPHeaderField:key];
+        }
+
+        // Inject user-agent by using the obj-c nullability to set and reset it
+        NSString *userAgent = requestHeaders[@"User-Agent"];
+        [[self webView] setCustomUserAgent:userAgent];
+    }
+
+    [[self webView] loadRequest:request];
+}
 
 + (WKUserScript *)userScriptScalePageToFit
 {
@@ -497,8 +551,36 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
     return nil;
 }
 
-#pragma mark Delegates
+- (void)setKeyboardDisplayRequiresUserAction_:(id)value
+{
+    [TiWkwebviewWebView _setKeyboardDisplayRequiresUserAction:[TiUtils boolValue:value]];
+    [[self proxy] replaceValue:value forKey:@"keyboardDisplayRequiresUserAction" notification:NO];
+}
 
+// WARNING: This is not officially available in WKWebView!
++ (void)_setKeyboardDisplayRequiresUserAction:(BOOL)value {
+    Class class = NSClassFromString([NSString stringWithFormat:@"W%@tV%@", @"KConten", @"iew"]);
+    
+    if ([TiUtils isIOSVersionOrGreater:@"11.3"]) {
+        SEL selector = sel_getUid("_startAssistingNode:userIsInteracting:blurPreviousNode:changingActivityState:userObject:");
+        Method method = class_getInstanceMethod(class, selector);
+        IMP original = method_getImplementation(method);
+        IMP override = imp_implementationWithBlock(^void(id me, void* arg0, BOOL arg1, BOOL arg2, BOOL arg3, id arg4) {
+            ((void (*)(id, SEL, void*, BOOL, BOOL, BOOL, id))original)(me, selector, arg0, !value, arg2, arg3, arg4);
+        });
+        method_setImplementation(method, override);
+    } else {
+        SEL selector = sel_getUid("_startAssistingNode:userIsInteracting:blurPreviousNode:userObject:");
+        Method method = class_getInstanceMethod(class, selector);
+        IMP original = method_getImplementation(method);
+        IMP override = imp_implementationWithBlock(^void(id me, void* arg0, BOOL arg1, BOOL arg2, id arg3) {
+            ((void (*)(id, SEL, void*, BOOL, BOOL, id))original)(me, selector, arg0,!value, arg2, arg3);
+        });
+        method_setImplementation(method, override);
+    }
+}
+    
+#pragma mark Delegates
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
@@ -536,9 +618,12 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
             } else if ([method isEqualToString:@"log"]) {
                 NSString *level = [event objectForKey:@"level"];
                 NSString *message = [event objectForKey:@"message"];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
                 if ([tiModule respondsToSelector:@selector(log:)]) {
                     [tiModule performSelector:@selector(log:) withObject:@[level, message]];
                 }
+#pragma clang diagnostic pop
             }
             return;
         }
@@ -556,33 +641,48 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler
 {
-    id basicAuthentication = [[self proxy] valueForKey:@"basicAuthentication"];
-    
-    NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
-    NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
-    NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
-    
-    // Allow invalid certificates if specified
-    if ([TiUtils boolValue:[[self proxy] valueForKey:@"ignoreSslError"] def:NO]) {
-        NSURLCredential * credential = [[NSURLCredential alloc] initWithTrust:[challenge protectionSpace].serverTrust];
-        completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
-        
-        return;
-    }
-    
+    NSString *authenticationMethod = [[challenge protectionSpace] authenticationMethod];
+    NSDictionary<NSString *, NSString *> *basicAuthentication = [[self proxy] valueForKey:@"basicAuthentication"];
+    BOOL ignoreSSLError = [TiUtils boolValue:[[self proxy] valueForKey:@"ignoreSslError"] def:NO];
+
     // Basic authentication
-    if (!basicAuthentication && username && password) {
-        completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
-                                                                                               password:password
-                                                                                            persistence:persistence]);
-     // Default handling
-    } else {
+    if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodDefault]
+        || [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic]
+        || [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest]) {
+
+        // If "basicAuthentication" property set -> Try to handle
+        if (basicAuthentication != nil) {
+            NSString *username = [TiUtils stringValue:@"username" properties:basicAuthentication];
+            NSString *password = [TiUtils stringValue:@"password" properties:basicAuthentication];
+            NSURLCredentialPersistence persistence = [TiUtils intValue:@"persistence" properties:basicAuthentication def:NSURLCredentialPersistenceNone];
+
+            completionHandler(NSURLSessionAuthChallengeUseCredential, [[NSURLCredential alloc] initWithUser:username
+                                                                                                   password:password
+                                                                                                persistence:persistence]);
+        // If "ignoreSslError" is set, ignore the possible error
+        } else if (ignoreSSLError) {
+            // Allow invalid certificates if specified
+            NSURLCredential * credential = [[NSURLCredential alloc] initWithTrust:[challenge protectionSpace].serverTrust];
+            completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
+        // Default: Reject authentication challenge
+        } else {
+            [self.proxy fireEvent:@"sslerror"];
+            completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
+        }
+    // HTTPS in general
+    } else if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
         completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+    // Default: Reject authentication challenge
+    } else {
+        completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
     }
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
+    [self _cleanupLoadingIndicator];
+    [(TiWkwebviewWebViewProxy *)[self proxy] refreshHTMLContent];
+
     if ([[self proxy] _hasListeners:@"load"]) {
         [[self proxy] fireEvent:@"load" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title}];
     }
@@ -590,22 +690,14 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
-    if ([[self proxy] _hasListeners:@"error"]) {
-        [[self proxy] fireEvent:@"error" withObject:@{@"url": webView.URL.absoluteString, @"title": webView.title, @"error": [error localizedDescription]}];
-    }
+    [self _cleanupLoadingIndicator];
+    [self _fireErrorEventWithError:error];
 }
 
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
-    if ([[self proxy] _hasListeners:@"error"]) {
-        NSURL *errorURL = webView.URL;
-
-        if (errorURL.absoluteString == nil) {
-            errorURL = [NSURL URLWithString:[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]];
-        }
-        
-        [[self proxy] fireEvent:@"error" withObject:@{@"url": NULL_IF_NIL(errorURL ? errorURL.absoluteString : nil), @"title": NULL_IF_NIL(webView.title), @"error": [error localizedDescription]}];
-    }
+    [self _cleanupLoadingIndicator];
+    [self _fireErrorEventWithError:error];
 }
 
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation
@@ -681,7 +773,36 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler
 {
-    if ([[[self proxy] valueForKey:@"allowedURLSchemes"] containsObject:navigationAction.request.URL.scheme]) {
+    NSArray<NSString *> *allowedURLSchemes = [[self proxy] valueForKey:@"allowedURLSchemes"];
+
+    // Handle blacklisted URL's
+    if (_blacklistedURLs != nil && _blacklistedURLs.count > 0) {
+        NSString *urlCandidate = webView.URL.absoluteString;
+        
+        for (NSString *blackListedURL in _blacklistedURLs) {
+            if ([urlCandidate rangeOfString:blackListedURL options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                if ([[self proxy] _hasListeners:@"blacklisturl"]) {
+                    [[self proxy] fireEvent:@"blacklisturl" withObject:@{
+                        @"url" : urlCandidate,
+                        @"message" : @"Webview did not load blacklisted url."
+                    }];
+                }
+
+                decisionHandler(WKNavigationActionPolicyCancel);
+                [self _cleanupLoadingIndicator];
+                return;
+            }
+        }
+    }
+
+    if ([[self proxy] _hasListeners:@"beforeload"]) {
+        [[self proxy] fireEvent:@"beforeload" withObject:@{
+            @"url": webView.URL.absoluteString,
+            @"navigationType": @(navigationAction.navigationType)
+        }];
+    }
+
+    if ([allowedURLSchemes containsObject:navigationAction.request.URL.scheme]) {
         if ([[UIApplication sharedApplication] canOpenURL:navigationAction.request.URL]) {
             // Event to return url to Titanium in order to handle OAuth and more
             if ([[self proxy] _hasListeners:@"handleurl"]) {
@@ -689,7 +810,6 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
                     @"url": [TiUtils stringValue:[[navigationAction request] URL]],
                     @"handler": [[TiWkwebviewDecisionHandlerProxy alloc] _initWithPageContext:[[self proxy] pageContext] andDecisionHandler:decisionHandler]
                 }];
-                return;
             } else {
                 // DEPRECATED: Should use the "handleurl" event instead and call openURL on Ti.Platform.openURL instead
                 DebugLog(@"[WARN] Please use the \"handleurl\" event together with \"allowedURLSchemes\" in Ti.WKWebView 2.5.0 and later.");
@@ -697,18 +817,109 @@ static NSString * const baseInjectScript = @"Ti._hexish=function(a){var r='';var
 
                 [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
                 decisionHandler(WKNavigationActionPolicyCancel);
-                return;
             }
         }
+    } else {
+        decisionHandler(WKNavigationActionPolicyAllow);
     }
-    
-    decisionHandler(WKNavigationActionPolicyAllow);
 }
+
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler
+{
+    NSDictionary<NSString *, id> *requestHeaders = [[self proxy] valueForKey:@"requestHeaders"];
+    NSURL *requestedURL = navigationResponse.response.URL;
+
+    // If we have request headers set, we do a little hack to persist them across different URL's,
+    // which is not officially supportted by iOS.
+    if (requestHeaders != nil && requestedURL != nil && ![requestedURL.absoluteString isEqualToString:_currentURL.absoluteString]) {
+        _currentURL = requestedURL;
+        decisionHandler(WKNavigationResponsePolicyCancel);
+        [self loadRequestWithURL:_currentURL];
+        return;
+    }
+
+    decisionHandler(WKNavigationResponsePolicyAllow);
+}
+
+#pragma mark Internal Utilities
 
 static NSString *UIKitLocalizedString(NSString *string)
 {
     NSBundle *UIKitBundle = [NSBundle bundleForClass:[UIApplication class]];
     return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
+}
+
+- (void)_fireErrorEventWithError:(NSError *)error
+{
+    if ([[self proxy] _hasListeners:@"error"]) {
+        NSURL *errorURL = _webView.URL;
+        
+        if (errorURL.absoluteString == nil) {
+            errorURL = [NSURL URLWithString:[[error userInfo] objectForKey:NSURLErrorFailingURLStringErrorKey]];
+        }
+        
+        [[self proxy] fireEvent:@"error" withObject:@{
+            @"success": @NO,
+            @"code": @(error.code),
+            @"url": NULL_IF_NIL(errorURL),
+            @"error": [error localizedDescription]
+        }];
+    }
+}
+
+
+- (void)_initializeLoadingIndicator
+{
+    BOOL hideLoadIndicator = [TiUtils boolValue:[self.proxy valueForKey:@"hideLoadIndicator"] def:NO];
+    
+    if ([TiWkwebviewWebView _isLocalURL:_webView.URL] || hideLoadIndicator) {
+        return;
+    }
+    
+    TiColor *backgroundColor = [TiUtils colorValue:[self.proxy valueForKey:@"backgroundColor"]];
+    UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleGray;
+    
+    if (backgroundColor != nil && [Webcolor isDarkColor:backgroundColor.color]) {
+        style = UIActivityIndicatorViewStyleWhite;
+    }
+    _loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
+    [_loadingIndicator setHidesWhenStopped:YES];
+    
+    [self addSubview:_loadingIndicator];
+    
+    UIView *superview = self;
+    NSDictionary *variables = NSDictionaryOfVariableBindings(_loadingIndicator, superview);
+    NSArray<NSLayoutConstraint *> *verticalConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"V:[superview]-(<=1)-[_loadingIndicator]"
+                                            options: NSLayoutFormatAlignAllCenterX
+                                            metrics:nil
+                                              views:variables];
+    [self addConstraints:verticalConstraints];
+    
+    NSArray<NSLayoutConstraint *> *horizontalConstraints =
+    [NSLayoutConstraint constraintsWithVisualFormat:@"H:[superview]-(<=1)-[_loadingIndicator]"
+                                            options: NSLayoutFormatAlignAllCenterY
+                                            metrics:nil
+                                              views:variables];
+    [self addConstraints:horizontalConstraints];
+    [_loadingIndicator startAnimating];
+}
+
+- (void)_cleanupLoadingIndicator
+{
+    if (_loadingIndicator == nil) return;
+    
+    [UIView beginAnimations:@"_hideAnimation" context:nil];
+    [UIView setAnimationDuration:0.3];
+    [_loadingIndicator removeFromSuperview];
+    [UIView commitAnimations];
+    _loadingIndicator = nil;
+}
+
++ (BOOL)_isLocalURL:(NSURL *)url
+{
+    NSString *scheme = [url scheme];
+    return [scheme isEqualToString:@"file"] || [scheme isEqualToString:@"app"];
 }
 
 #pragma mark Layout helper

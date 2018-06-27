@@ -55,30 +55,34 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | data | Ti.Blob, Ti.File |
 | html | String |
 | title | String |
-| progress | Double |
+| progress | Number |
 | backForwardList | Object |
 | ignoreSslError | Boolean |
 | basicAuhentication | Object<br/>- username (String)<br/>- password (String)<br/>- persistence (CREDENTIAL_PERSISTENCE_*) |
 | cachePolicy | CACHE_POLICY_* |
-| timeout | Double |
+| timeout | Number |
 | selectionGranularity | SELECTION_GRANULARITY_* |
 | allowedURLSchemes | Array\<String\> |
 | touchEnabled | Boolean |
 | willHandleTouches | Boolean |
+| requestHeaders | Object<String, Any> |
+| zoomLevel | Number |
+| keyboardDisplayRequiresUserAction | Boolean |
 
 #### Methods
 
 | Name | Parameter | Return |
 |------|-----------|--------|
 | stopLoading | - | Void |
+| setHtml | html, options (Object - { baseURL, mimeType }, optional) | Void |
 | reload | - | Void |
+| repaint | - | Void |
 | goBack | - | Void |
 | goForward | - | Void |
 | canGoBack | - | Boolean |
 | canGoForward | - | Boolean |
 | isLoading | - | Boolean |
-| evalJS | Code (String), Callback (Function) | Void |
-| evalJSSync | Code (String) | String |
+| evalJS | Code (String), Callback (Function, optional) | String (if sync) |
 | startListeningToProperties | Array<String> | Void |
 | stopListeningToProperties | Array<String> | Void |
 | fireEvent | Name (String), Payload (Object) | Void |
@@ -98,11 +102,13 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 |------|------------|
 | message | name, body, url, isMainFrame |
 | progress | value, url |
-| beforeload | url, title |
+| beforeload | url, navigationType, title |
 | load | url, title |
 | redirect | url, title |
-| error | url, title, error |
+| error | success, url, error, code |
+| sslerror | url |
 | handleurl | url |
+| blacklisturl | url |
 
 #### Constants
 
