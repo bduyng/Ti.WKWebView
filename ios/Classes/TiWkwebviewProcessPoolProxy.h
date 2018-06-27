@@ -7,8 +7,9 @@
 #import "TiProxy.h"
 #import <WebKit/WebKit.h>
 
-@interface TiWkwebviewProcessPoolProxy : TiProxy {}
+@interface TiWkwebviewProcessPoolProxy : TiProxy {
+}
 
-@property(nonatomic, strong) WKProcessPool *pool;
+@property (nonatomic, strong) WKProcessPool *pool;
 
 @end

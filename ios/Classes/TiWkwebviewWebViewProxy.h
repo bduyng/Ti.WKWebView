@@ -5,13 +5,13 @@
  * Please see the LICENSE included with this distribution for details.
  */
 
-#import "TiViewProxy.h"
 #import "TiEvaluator.h"
+#import "TiViewProxy.h"
 
 @interface TiWkwebviewWebViewProxy : TiViewProxy <TiEvaluator> {
-    NSMutableArray<NSString *> *genericProperties;
-    NSArray *_allowedURLSchemes;
-    NSString *_pageToken;
+  NSMutableArray<NSString *> *genericProperties;
+  NSArray *_allowedURLSchemes;
+  NSString *_pageToken;
 }
 
 - (void)refreshHTMLContent;

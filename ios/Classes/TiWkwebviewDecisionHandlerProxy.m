@@ -15,7 +15,7 @@
   if (self = [super _initWithPageContext:pageContext]) {
     _decisionHandler = decisionHandler;
   }
-  
+
   return self;
 }
 
