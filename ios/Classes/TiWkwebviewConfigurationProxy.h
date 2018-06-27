@@ -7,8 +7,8 @@
 #import "TiProxy.h"
 
 @interface TiWkwebviewConfigurationProxy : TiProxy {
-@private
-    WKWebViewConfiguration *_configuration;
+  @private
+  WKWebViewConfiguration *_configuration;
 }
 
 - (WKWebViewConfiguration *)configuration;

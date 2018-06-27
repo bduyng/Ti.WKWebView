@@ -5,23 +5,23 @@
  * Please see the LICENSE included with this distribution for details.
  */
 
-#import "TiUIView.h"
 #import "TiDimension.h"
+#import "TiUIView.h"
 #import <WebKit/WebKit.h>
 
 @interface TiWkwebviewWebView : TiUIView <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler> {
-    WKWebView *_webView;
-    NSString *_pageToken;
+  WKWebView *_webView;
+  NSString *_pageToken;
 
-    TiDimension width;
-    TiDimension height;
-    CGFloat autoHeight;
-    CGFloat autoWidth;
-    
-    BOOL _willHandleTouches;
-    NSArray<NSString *> *_blacklistedURLs;
-    NSURL *_currentURL;
-    UIActivityIndicatorView *_loadingIndicator;
+  TiDimension width;
+  TiDimension height;
+  CGFloat autoHeight;
+  CGFloat autoWidth;
+
+  BOOL _willHandleTouches;
+  NSArray<NSString *> *_blacklistedURLs;
+  NSURL *_currentURL;
+  UIActivityIndicatorView *_loadingIndicator;
 }
 
 // Used from the proxy

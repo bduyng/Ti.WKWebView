@@ -11,11 +11,11 @@
 
 - (id)_initWithPageContext:(id<TiEvaluator>)context
 {
-    if (self = [super _initWithPageContext:context]) {
-        _pool = [[WKProcessPool alloc] init];
-    }
-    
-    return self;
+  if (self = [super _initWithPageContext:context]) {
+    _pool = [[WKProcessPool alloc] init];
+  }
+
+  return self;
 }
 
 @end

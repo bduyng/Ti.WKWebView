@@ -17,11 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
  * Manage Kroll-callback used to enable WebView-wide event handling.
  */
 @interface TiCallbackManager : NSObject {
-@private
-    /**
+  @private
+  /**
      * Data structure used to store the callbacks.
      */
-    NSMutableDictionary<NSString *, KrollCallback *> *_callbacks;
+  NSMutableDictionary<NSString *, KrollCallback *> *_callbacks;
 }
 
 /**

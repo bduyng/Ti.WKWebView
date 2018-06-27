@@ -7,12 +7,11 @@
 
 #import "TiModule.h"
 
-extern NSString * const kTiWKFireEvent;
-extern NSString * const kTiWKAddEventListener;
-extern NSString * const kTiWKEventCallback;
+extern NSString *const kTiWKFireEvent;
+extern NSString *const kTiWKAddEventListener;
+extern NSString *const kTiWKEventCallback;
 
 @interface TiWkwebviewModule : TiModule {
-
 }
 
 @end
