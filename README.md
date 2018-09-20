@@ -82,7 +82,7 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | canGoBack | - | Boolean |
 | canGoForward | - | Boolean |
 | isLoading | - | Boolean |
-| evalJS | Code (String), Callback (Function, optional) | String (if sync) |
+| evalJS \*\* | Code (String), Callback (Function) |
 | startListeningToProperties | Array<String> | Void |
 | stopListeningToProperties | Array<String> | Void |
 | fireEvent | Name (String), Payload (Object) | Void |
@@ -94,7 +94,16 @@ Edit the iOS and modules section of your `tiapp.xml` file to include this module
 | addScriptMessageHandler | Name (String) | Void |
 | removeScriptMessageHandler | Name (String) | Void |
 
-* Available on iOS 11.0+
+\* Available on iOS 11.0+
+
+\*\* Since iOS 12.0, using `evalJS` in sync is not possible anymore, because the internal callback is now
+called on the main thread, causing a deadlock in the run-loop that is used to return the value synchronously.
+To fix this, please use the asynchronous solution:
+```js
+webView.evalJS('document.title', function (e) {
+    alert(e.result);
+});
+```
 
 #### Events
 
