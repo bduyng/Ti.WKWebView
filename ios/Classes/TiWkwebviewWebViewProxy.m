@@ -412,6 +412,8 @@
 
 - (id)evalJS:(id)args
 {
+  ENSURE_UI_THREAD(evalJS, args);
+
   NSString *code = nil;
   KrollCallback *callback = nil;
 

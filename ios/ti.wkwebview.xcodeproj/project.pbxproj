@@ -30,6 +30,7 @@
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 		DB06B2481E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */; };
 		DB06B2491E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */; };
+		DB1E6E322153A4C40056E9AF /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB1E6E312153A4C40056E9AF /* WebKit.framework */; };
 		DB56BC5F1EC888E8004FA09B /* TiCallbackManager.h in Headers */ = {isa = PBXBuildFile; fileRef = DB56BC5D1EC888E8004FA09B /* TiCallbackManager.h */; };
 		DB56BC601EC888E8004FA09B /* TiCallbackManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DB56BC5E1EC888E8004FA09B /* TiCallbackManager.m */; };
 		DB59D5181E0ED6BF009A0C43 /* TiWkwebviewWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */; };
@@ -63,6 +64,7 @@
 		D2AAC07E0554694100DB518D /* libti.wkwebview.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libti.wkwebview.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB06B2461E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewProcessPoolProxy.h; path = Classes/TiWkwebviewProcessPoolProxy.h; sourceTree = "<group>"; };
 		DB06B2471E12970E00B79CEF /* TiWkwebviewProcessPoolProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiWkwebviewProcessPoolProxy.m; path = Classes/TiWkwebviewProcessPoolProxy.m; sourceTree = "<group>"; };
+		DB1E6E312153A4C40056E9AF /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DB56BC5D1EC888E8004FA09B /* TiCallbackManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiCallbackManager.h; path = Classes/TiCallbackManager.h; sourceTree = "<group>"; };
 		DB56BC5E1EC888E8004FA09B /* TiCallbackManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiCallbackManager.m; path = Classes/TiCallbackManager.m; sourceTree = "<group>"; };
 		DB59D5141E0ED6BF009A0C43 /* TiWkwebviewWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiWkwebviewWebView.h; path = Classes/TiWkwebviewWebView.h; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB1E6E322153A4C40056E9AF /* WebKit.framework in Frameworks */,
 				AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -109,6 +112,7 @@
 		0867D69AFE84028FC02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DB1E6E312153A4C40056E9AF /* WebKit.framework */,
 				AACBBE490F95108600F1A2B1 /* Foundation.framework */,
 			);
 			name = Frameworks;

@@ -44,18 +44,20 @@ static NSString *const baseInjectScript = @"Ti._hexish=function(a){var r='';var 
     [config setUserContentController:controller];
     _willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
 
-    _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:config];
-
-    [_webView setUIDelegate:self];
-    [_webView setNavigationDelegate:self];
-    [_webView setContentMode:[self contentModeForWebView]];
-    [_webView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
-
-    // KVO for "progress" event
-    [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
-
-    [self addSubview:_webView];
-    [self _initializeLoadingIndicator];
+    dispatch_sync(dispatch_get_main_queue(), ^{
+      _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:config];
+      
+      [_webView setUIDelegate:self];
+      [_webView setNavigationDelegate:self];
+      [_webView setContentMode:[self contentModeForWebView]];
+      [_webView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
+      
+      // KVO for "progress" event
+      [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
+      
+      [self addSubview:_webView];
+      [self _initializeLoadingIndicator];
+    });
   }
 
   return _webView;
