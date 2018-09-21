@@ -412,8 +412,6 @@
 
 - (id)evalJS:(id)args
 {
-  ENSURE_UI_THREAD(evalJS, args);
-
   NSString *code = nil;
   KrollCallback *callback = nil;
 
@@ -432,25 +430,36 @@
     return [self evalJSSync:@[ code ]];
   }
 
-  [[[self webView] webView] evaluateJavaScript:code
-                             completionHandler:^(id result, NSError *error) {
-                               if (!callback) {
-                                 return;
-                               }
-
-                               NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
-                                 @"result" : result ?: [NSNull null],
-                                 @"success" : NUMBOOL(error == nil)
-                               }];
-
-                               if (error) {
-                                 [event setObject:[error localizedDescription] forKey:@"error"];
-                               }
-
-                               [callback call:[[NSArray alloc] initWithObjects:&event count:1] thisObject:self];
-                             }];
+  if ([TiUtils isIOS11OrGreater]) {
+    TiThreadPerformOnMainThread(^{
+      [self evaluateJavaScript:code WithCallback:callback];
+    }, NO);
+  }
+  else {
+    [self evaluateJavaScript:code WithCallback:callback];
+  }
 
   return nil;
+}
+
+- (void)evaluateJavaScript:(NSString *)code WithCallback:(KrollCallback *)callback {
+  [[[self webView] webView] evaluateJavaScript:code
+                              completionHandler:^(id result, NSError *error) {
+                                if (!callback) {
+                                    return;
+                                }
+                                
+                                NSMutableDictionary *event = [NSMutableDictionary dictionaryWithDictionary:@{
+                                                                                                            @"result" : result ?: [NSNull null],
+                                                                                                            @"success" : NUMBOOL(error == nil)
+                                                                                                            }];
+                                
+                                if (error) {
+                                    [event setObject:[error localizedDescription] forKey:@"error"];
+                                }
+                                
+                                [callback call:[[NSArray alloc] initWithObjects:&event count:1] thisObject:self];
+                              }];
 }
 
 - (NSString *)evalJSSync:(id)args
