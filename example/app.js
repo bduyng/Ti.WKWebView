@@ -58,7 +58,7 @@ var btn = Ti.UI.createButton({
 
 btn.addEventListener('click', function() {
   // Asynchronous to unblock main-thread, with optional second parameter for callback
-  webView.evalJS('invokeMyJSMethod({message: \'Titanium rocks!\'})');
+  webView.evalJS('invokeMyJSMethod({message: \'Titanium rocks!\'})', function(e) {});
 });
 
 win.setLeftNavButton(btn);
