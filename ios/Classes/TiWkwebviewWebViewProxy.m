@@ -9,6 +9,7 @@
 #import "TiHost.h"
 #import "TiUtils.h"
 #import "TiWkwebviewWebView.h"
+#import <AvailabilityInternal.h>
 
 @implementation TiWkwebviewWebViewProxy
 
@@ -297,10 +298,6 @@
   _allowedURLSchemes = schemes;
 }
 
-- (void)setHtml:(id)args
-{
-  [[self webView] setHtml_:args];
-}
 
 #pragma mark Methods
 

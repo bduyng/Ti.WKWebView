@@ -45,9 +45,9 @@ static NSString *const baseInjectScript = @"Ti._hexish=function(a){var r='';var 
     _willHandleTouches = [TiUtils boolValue:[[self proxy] valueForKey:@"willHandleTouches"] def:YES];
 
     if ([TiUtils isIOS11OrGreater]) {
-      dispatch_sync(dispatch_get_main_queue(), ^{
+      TiThreadPerformOnMainThread(^{
         [self _initializeWebView:config];
-      });
+      }, YES);
     }
     else {
       [self _initializeWebView:config];
